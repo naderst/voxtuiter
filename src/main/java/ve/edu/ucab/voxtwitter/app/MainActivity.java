@@ -1,37 +1,34 @@
 package ve.edu.ucab.voxtwitter.app;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.speech.tts.TextToSpeech;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
-public class MainActivity extends ActionBarActivity {
+import java.util.Locale;
+
+public class MainActivity extends ActionBarActivity implements TextToSpeech.OnInitListener {
+    private TextToSpeech vox;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-    }
-
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        
-        // Inflate the menu; this adds items to the action bar if it is present.
-        // getMenuInflater().inflate(R.menu.main, menu);
-        return true;
+        vox = new TextToSpeech(this, this);
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            return true;
+    public void onInit(int status) {
+        if (status == TextToSpeech.SUCCESS) {
+            vox.setLanguage(Locale.getDefault());
+            vox.speak("Texto de prueba para vox twitter", TextToSpeech.QUEUE_FLUSH, null);
+        } else {
+            vox = null;
+            Toast.makeText(this, "Failed to initialize TTS engine.", Toast.LENGTH_SHORT).show();
         }
-        return super.onOptionsItemSelected(item);
     }
-
 }
