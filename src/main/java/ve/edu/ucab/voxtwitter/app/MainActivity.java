@@ -11,13 +11,14 @@
  */
 package ve.edu.ucab.voxtwitter.app;
 
+import android.app.Instrumentation;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.net.Uri;
 import android.os.Bundle;
 import android.speech.RecognizerIntent;
 import android.speech.tts.TextToSpeech;
-import android.speech.tts.UtteranceProgressListener;
 import android.support.v7.app.ActionBarActivity;
-import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -25,19 +26,16 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.concurrent.Semaphore;
 
-import twitter4j.ResponseList;
-import twitter4j.Status;
-import twitter4j.Twitter;
-import twitter4j.TwitterException;
-import twitter4j.TwitterFactory;
-import twitter4j.conf.ConfigurationBuilder;
-
 public class MainActivity extends ActionBarActivity implements TextToSpeech.OnInitListener, TextToSpeech.OnUtteranceCompletedListener {
     private TextToSpeech vox;
-    private ResponseList<Status> list;
     private static final int REQUEST_CODE = 1234;
-    private EventsManager eventsManager;
+    private AppMain appMain;
     private Intent intent;
+    private ArrayList<String> matches;
+    private Semaphore wait4speech;
+    /**
+     * Semáforo para bloquear el método speak hasta que el motor tts termine de hablar
+     */
     private Semaphore wait4speak;
 
     @Override
@@ -49,10 +47,18 @@ public class MainActivity extends ActionBarActivity implements TextToSpeech.OnIn
 
     /**
      * Escucha al usuario para luego procesar su voz y llevarla a texto.
-     * La ejecución se hace de manera asíncrona y es procesada por el método onActivityResult
+     * La ejecución se hace de manera bloqueante y es procesada por el método onActivityResult
      */
-    public void listenSpeech() {
+    public ArrayList<String> listenSpeech() {
         startActivityForResult(intent, REQUEST_CODE);
+
+        try {
+            wait4speech.acquire();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        return matches;
     }
 
     /**
@@ -75,6 +81,14 @@ public class MainActivity extends ActionBarActivity implements TextToSpeech.OnIn
         }
     }
 
+    /**
+     * Abre una url en el navegador de Android
+     * @param url URL a mostrar en el navegador
+     */
+    public void openURL(String url) {
+        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
+    }
+
     /*
         Evento que se dispara cuando el motor de la API TextToSpeech está listo
      */
@@ -86,9 +100,21 @@ public class MainActivity extends ActionBarActivity implements TextToSpeech.OnIn
             intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
             intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS, 0);
             intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 0);
-            wait4speak = new Semaphore(0); // Semáforo para bloquear el método speak hasta que el motor tts termine de hablar
-            eventsManager = new EventsManager(this);
-            eventsManager.onInit();
+            wait4speak = new Semaphore(0);
+            wait4speech = new Semaphore(0);
+
+            final MainActivity mainActivity = this;
+
+            Thread thread = new Thread() {
+                @Override
+                public void run() {
+                    appMain = new AppMain(mainActivity);
+                    appMain.onInit();
+                }
+            };
+
+            thread.start();
+
         } else {
             vox = null;
             Toast.makeText(this, "Failed to initialize TTS engine.", Toast.LENGTH_SHORT).show();
@@ -102,9 +128,10 @@ public class MainActivity extends ActionBarActivity implements TextToSpeech.OnIn
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_CODE && resultCode == RESULT_OK) {
             // La variable matches contiene las distintas frases que se detectaron a traves del micrófono
-            ArrayList<String> matches = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
-            eventsManager.onSpeak(matches);
+            matches = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+            wait4speech.release();
         }
+
         super.onActivityResult(requestCode, resultCode, data);
     }
 
