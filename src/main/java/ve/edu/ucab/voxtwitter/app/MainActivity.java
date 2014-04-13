@@ -11,9 +11,8 @@
  */
 package ve.edu.ucab.voxtwitter.app;
 
-import android.app.Instrumentation;
 import android.content.Intent;
-import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.speech.RecognizerIntent;
@@ -72,7 +71,7 @@ public class MainActivity extends ActionBarActivity implements TextToSpeech.OnIn
 
         myHashAlarm.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "FIN");
 
-        vox.speak(text, TextToSpeech.QUEUE_ADD, myHashAlarm);
+        vox.speak(text, TextToSpeech.QUEUE_FLUSH, myHashAlarm);
 
         try {
             wait4speak.acquire();
@@ -127,7 +126,7 @@ public class MainActivity extends ActionBarActivity implements TextToSpeech.OnIn
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_CODE && resultCode == RESULT_OK) {
-            // La variable matches contiene las distintas frases que se detectaron a traves del micrófono
+            // La variable matches contiene las distintas frases que se detectaron a través del micrófono
             matches = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
             wait4speech.release();
         }
@@ -138,5 +137,17 @@ public class MainActivity extends ActionBarActivity implements TextToSpeech.OnIn
     @Override
     public void onUtteranceCompleted(String s) {
         wait4speak.release(); // Envía la señal de que el motor tts terminó de hablar
+    }
+
+    public void save(String key, String val) {
+        SharedPreferences settings = getSharedPreferences("tokens", 0);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putString(key, val);
+        editor.commit();
+    }
+
+    public String read(String key) {
+        SharedPreferences settings = getSharedPreferences("tokens", 0);
+        return settings.getString(key, "");
     }
 }

@@ -11,8 +11,6 @@
  */
 package ve.edu.ucab.voxtwitter.app;
 
-import java.util.ArrayList;
-
 /**
  * La clase AppMain es una abstracción para manejar el flujo de la App
  */
@@ -29,6 +27,8 @@ public class AppMain {
      * Evento que se ejecuta cuando la aplicación está lista para empezar
      */
     public void onInit() {
-
+        mainActivity.speak("Diga un tweet");
+        twitter.tweet(mainActivity.listenSpeech().get(0));
+        mainActivity.speak("Has publicado un tuit");
     }
 }
