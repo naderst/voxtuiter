@@ -31,7 +31,7 @@ public class MainActivity extends ActionBarActivity implements TextToSpeech.OnIn
     private AppMain appMain;
     private Intent intent;
     private ArrayList<String> matches;
-    private Semaphore wait4speech;
+    private Thread thread;
     /**
      * Semáforo para bloquear el método speak hasta que el motor tts termine de hablar
      */
@@ -47,17 +47,22 @@ public class MainActivity extends ActionBarActivity implements TextToSpeech.OnIn
     /**
      * Escucha al usuario para luego procesar su voz y llevarla a texto.
      * La ejecución se hace de manera bloqueante y es procesada por el método onActivityResult
+     *
+     * @return Lista de frases escuchadas
      */
     public ArrayList<String> listenSpeech() {
-        startActivityForResult(intent, REQUEST_CODE);
+        while(true) {
+            startActivityForResult(intent, REQUEST_CODE);
+            matches.clear();
 
-        try {
-            wait4speech.acquire();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+            try {
+                Thread.sleep(15000);
+            } catch (InterruptedException e) {
+                return matches;
+            }
+
+            speak("Lo siento, no escuché lo que dijiste, vuelve a intentarlo");
         }
-
-        return matches;
     }
 
     /**
@@ -100,11 +105,11 @@ public class MainActivity extends ActionBarActivity implements TextToSpeech.OnIn
             intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS, 0);
             intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 0);
             wait4speak = new Semaphore(0);
-            wait4speech = new Semaphore(0);
+            matches = new ArrayList<String>();
 
             final MainActivity mainActivity = this;
 
-            Thread thread = new Thread() {
+            thread = new Thread() {
                 @Override
                 public void run() {
                     appMain = new AppMain(mainActivity);
@@ -128,7 +133,7 @@ public class MainActivity extends ActionBarActivity implements TextToSpeech.OnIn
         if (requestCode == REQUEST_CODE && resultCode == RESULT_OK) {
             // La variable matches contiene las distintas frases que se detectaron a través del micrófono
             matches = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
-            wait4speech.release();
+            thread.interrupt();
         }
 
         super.onActivityResult(requestCode, resultCode, data);
@@ -139,6 +144,12 @@ public class MainActivity extends ActionBarActivity implements TextToSpeech.OnIn
         wait4speak.release(); // Envía la señal de que el motor tts terminó de hablar
     }
 
+    /**
+     * Almacena un par clave/valor en un archivo
+     *
+     * @param key Clave del valor
+     * @param val Valor que se desea almacenar
+     */
     public void save(String key, String val) {
         SharedPreferences settings = getSharedPreferences("tokens", 0);
         SharedPreferences.Editor editor = settings.edit();
@@ -146,6 +157,12 @@ public class MainActivity extends ActionBarActivity implements TextToSpeech.OnIn
         editor.commit();
     }
 
+    /**
+     * Obtiene un valor dado una clave
+     *
+     * @param key Clave del valor a obtener
+     * @return Valor de clave, si no existe la clave retorna vacío
+     */
     public String read(String key) {
         SharedPreferences settings = getSharedPreferences("tokens", 0);
         return settings.getString(key, "");
