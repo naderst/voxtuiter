@@ -1,15 +1,15 @@
 /*
-    Vox Twitter
+    Vox Tuiter
 
     Desarrollado por:
         - Nader Abu Fakhr (@naderst)
         - Moisés Moussa (@mdsse)
 
-    GitHub: https://github.com/naderst/voxtwitter
+    GitHub: https://github.com/naderst/voxtuiter
 
     UCAB Guayana - Puerto Ordaz, Edo Bolívar. Venezuela
  */
-package ve.edu.ucab.voxtwitter.app;
+package ve.edu.ucab.voxtuiter.app;
 
 import twitter4j.ResponseList;
 import twitter4j.Status;

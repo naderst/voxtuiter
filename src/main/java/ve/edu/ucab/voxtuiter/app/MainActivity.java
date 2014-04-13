@@ -1,15 +1,15 @@
 /*
-    Vox Twitter
+    Vox Tuiter
 
     Desarrollado por:
         - Nader Abu Fakhr (@naderst)
         - Moisés Moussa (@mdsse)
 
-    GitHub: https://github.com/naderst/voxtwitter
+    GitHub: https://github.com/naderst/voxtuiter
 
     UCAB Guayana - Puerto Ordaz, Edo Bolívar. Venezuela
  */
-package ve.edu.ucab.voxtwitter.app;
+package ve.edu.ucab.voxtuiter.app;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -24,6 +24,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.concurrent.Semaphore;
+
+import ve.edu.ucab.voxtwitter.app.R;
 
 public class MainActivity extends ActionBarActivity implements TextToSpeech.OnInitListener, TextToSpeech.OnUtteranceCompletedListener {
     private TextToSpeech vox;
