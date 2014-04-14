@@ -21,7 +21,7 @@ import twitter4j.auth.RequestToken;
 import twitter4j.conf.ConfigurationBuilder;
 
 /**
- * Interfaz para manejar el API de Twitter
+ * Interfaz para manejar la API de Twitter
  */
 public class TwitterManager {
     private TwitterFactory tf;

@@ -73,6 +73,8 @@ public class AppMain {
                 System.exit(0);
             }
 
+            mainActivity.speak("Comando inválido, vuelva a intentarlo");
+
             System.out.println(matches.toString());
         }
     }
