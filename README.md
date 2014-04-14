@@ -1,7 +1,7 @@
-<p align="center"><img src="src/main/res/drawable-xhdpi/ic_launcher.png"></p>
+<p align="center"><img src="src/main/res/drawable-xhdpi/logo.png"></p>
 Vox Tuiter
 ====
-Cliente de Twitter para personas con discapacidad visual. El cliente permite al usuario utilizar la red social Twitter a través de comandos de voz y cuenta con un narrador que permite al usuario utilizar las funciones básicas de dicha red social.
+Cliente de Twitter para personas con discapacidad visual. El cliente permite al usuario utilizar la red social Twitter a través de comandos de voz y cuenta con un narrador que permite al usuario utilizar las funciones básicas de dicha red social sin necesidad de leer o escribir.
 
 Este proyecto fue desarrollado en la asignatura Desarrollo de Software del 8vo Semestre de Ingeniería Informática de la [UCAB Guayana](http://guayanaweb.ucab.edu.ve).
 
