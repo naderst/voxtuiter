@@ -32,9 +32,9 @@ public class AppMain {
      * Evento que se ejecuta cuando la aplicación está lista para empezar
      */
     public void onInit() {
-        mainActivity.speak("Diga un comando");
 
         while(true) {
+            mainActivity.speak("Diga un comando");
             ArrayList<String> matches = mainActivity.listenSpeech();
             String comando = matches.get(0);
 
@@ -69,10 +69,9 @@ public class AppMain {
                 continue;
             }
 
-            if(comando.equals("salir"))
+            if(comando.equals("salir")) {
                 System.exit(0);
-
-            mainActivity.speak("Comando inválido, vuelva a intentarlo");
+            }
 
             System.out.println(matches.toString());
         }

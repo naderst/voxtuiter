@@ -25,8 +25,6 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.concurrent.Semaphore;
 
-import ve.edu.ucab.voxtwitter.app.R;
-
 public class MainActivity extends ActionBarActivity implements TextToSpeech.OnInitListener, TextToSpeech.OnUtteranceCompletedListener {
     private TextToSpeech vox;
     private static final int REQUEST_CODE = 1234;
@@ -63,7 +61,7 @@ public class MainActivity extends ActionBarActivity implements TextToSpeech.OnIn
                 return matches;
             }
 
-            speak("Lo siento, no escuché lo que dijiste, vuelve a intentarlo");
+            speak("Lo siento, no escuché lo que dijo, vuelva a intentarlo");
         }
     }
 
@@ -169,4 +167,5 @@ public class MainActivity extends ActionBarActivity implements TextToSpeech.OnIn
         SharedPreferences settings = getSharedPreferences("tokens", 0);
         return settings.getString(key, "");
     }
+
 }
