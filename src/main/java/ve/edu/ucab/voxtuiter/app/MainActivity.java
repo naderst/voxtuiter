@@ -23,19 +23,25 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
-import java.util.concurrent.Semaphore;
 
 public class MainActivity extends ActionBarActivity implements TextToSpeech.OnInitListener, TextToSpeech.OnUtteranceCompletedListener {
-    private TextToSpeech vox;
     private static final int REQUEST_CODE = 1234;
-    private AppMain appMain;
-    private Intent intent;
-    private ArrayList<String> matches;
-    private Thread thread;
     /**
-     * Semáforo para bloquear el método speak hasta que el motor tts termine de hablar
+     * Objeto para llevar un texto a voz
      */
-    private Semaphore wait4speak;
+    private TextToSpeech vox;
+    /**
+     * Clase que se encarga de manejar el flujo de la App
+     */
+    private AppMain appMain;
+    /**
+     * Intent asociado a la actividad de reconocimiento de la voz
+     */
+    private Intent intent;
+    /**
+     * Lista con todas las frases escuchadas con el reconocedor de voz de android
+     */
+    private ArrayList<String> matches;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,15 +59,26 @@ public class MainActivity extends ActionBarActivity implements TextToSpeech.OnIn
     public ArrayList<String> listenSpeech() {
         while(true) {
             startActivityForResult(intent, REQUEST_CODE);
-            matches.clear();
 
-            try {
-                Thread.sleep(15000);
-            } catch (InterruptedException e) {
-                return matches;
+            synchronized (matches) {
+                matches.clear();
+
+                while(true) {
+                    try {
+                        matches.wait(15000); // El hilo se bloquea hasta que el usuario termine de hablar
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+
+                    if(matches.isEmpty()) {
+                        /* Ha pasado mucho tiempo y el usuario no ha dicho nada? */
+                        speak("Lo siento, no escuché lo que dijo, vuelva a intentarlo");
+                        break;
+                    } else {
+                        return matches;
+                    }
+                }
             }
-
-            speak("Lo siento, no escuché lo que dijo, vuelva a intentarlo");
         }
     }
 
@@ -78,10 +95,12 @@ public class MainActivity extends ActionBarActivity implements TextToSpeech.OnIn
 
         vox.speak(text, TextToSpeech.QUEUE_FLUSH, myHashAlarm);
 
-        try {
-            wait4speak.acquire();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        synchronized (this) {
+            try {
+                wait(); // El hilo se bloquea hasta que la App termine de narrar el texto
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -104,20 +123,17 @@ public class MainActivity extends ActionBarActivity implements TextToSpeech.OnIn
             intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
             intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS, 0);
             intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 0);
-            wait4speak = new Semaphore(0);
             matches = new ArrayList<String>();
 
             final MainActivity mainActivity = this;
 
-            thread = new Thread() {
+            new Thread() {
                 @Override
                 public void run() {
                     appMain = new AppMain(mainActivity);
                     appMain.onInit();
                 }
-            };
-
-            thread.start();
+            }.start();
 
         } else {
             vox = null;
@@ -131,9 +147,11 @@ public class MainActivity extends ActionBarActivity implements TextToSpeech.OnIn
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_CODE && resultCode == RESULT_OK) {
-            // La variable matches contiene las distintas frases que se detectaron a través del micrófono
-            matches = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
-            thread.interrupt();
+            synchronized (matches) {
+                // La variable matches contiene las distintas frases que se detectaron a través del micrófono
+                matches.addAll(data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS));
+                matches.notify();
+            }
         }
 
         super.onActivityResult(requestCode, resultCode, data);
@@ -141,7 +159,9 @@ public class MainActivity extends ActionBarActivity implements TextToSpeech.OnIn
 
     @Override
     public void onUtteranceCompleted(String s) {
-        wait4speak.release(); // Envía la señal de que el motor tts terminó de hablar
+        synchronized (this) {
+            notify(); // Envía la señal de que el motor tts terminó de hablar
+        }
     }
 
     /**

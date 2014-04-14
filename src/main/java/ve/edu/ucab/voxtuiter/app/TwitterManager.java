@@ -29,14 +29,25 @@ public class TwitterManager {
 
     TwitterManager(MainActivity mainActivity) {
         ConfigurationBuilder cb = new ConfigurationBuilder();
+        /* Configuramos oAuth con las claves otorgadas por Twitter */
         cb.setDebugEnabled(true).setOAuthConsumerKey(Configuration.consumerKey)
                 .setOAuthConsumerSecret(Configuration.consumerSecret);
 
+        /*
+            Verificamos si hay tokens de acceso almacenados, si los hay los utilizamos para
+            autenticar...
+         */
         if(!mainActivity.read("accessToken").isEmpty() && !mainActivity.read("accessSecret").isEmpty()) {
             cb.setOAuthAccessToken(mainActivity.read("accessToken")).setOAuthAccessTokenSecret(mainActivity.read("accessSecret"));
             tf = new TwitterFactory(cb.build());
             twitter = tf.getInstance();
         } else {
+            /*
+            ...de lo contrario debemos enviar al usuario a la página de Twitter
+            para autorizar la App, el usuario debe dictar el PIN generado por Twitter, de manera
+            que la App pueda completar la autenticación, por último guardamos las credenciales
+            (tokens de acceso) para que el usuario no vuelva a pasar por este proceso.
+             */
             tf = new TwitterFactory(cb.build());
             twitter = tf.getInstance();
 

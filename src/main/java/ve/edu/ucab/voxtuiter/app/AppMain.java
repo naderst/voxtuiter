@@ -20,7 +20,15 @@ import twitter4j.Status;
  * La clase AppMain es una abstracción para manejar el flujo de la App
  */
 public class AppMain {
+    /**
+     * Objeto que se encarga de realizar el trabajo "sucio" de la App, brindando una interfaz
+     * para los métodos básicos de la App.
+     */
     private MainActivity mainActivity;
+    /**
+     * Objeto que permite utilizar las primitivas de Twitter de una manera sencilla.
+     * No es más que un wrapper de twitter4j.
+     */
     private TwitterManager twitter;
 
     AppMain(MainActivity mainActivity) {
