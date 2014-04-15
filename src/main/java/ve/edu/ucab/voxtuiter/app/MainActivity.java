@@ -63,20 +63,17 @@ public class MainActivity extends ActionBarActivity implements TextToSpeech.OnIn
             synchronized (matches) {
                 matches.clear();
 
-                while(true) {
-                    try {
-                        matches.wait(15000); // El hilo se bloquea hasta que el usuario termine de hablar
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
+                try {
+                    matches.wait(15000); // El hilo se bloquea hasta que el usuario termine de hablar
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
 
-                    if(matches.isEmpty()) {
-                        /* Ha pasado mucho tiempo y el usuario no ha dicho nada? */
-                        speak("Lo siento, no escuché lo que dijo, vuelva a intentarlo");
-                        break;
-                    } else {
-                        return matches;
-                    }
+                if(matches.isEmpty()) {
+                    /* Ha pasado mucho tiempo y el usuario no ha dicho nada? */
+                    speak("Lo siento, no escuché lo que dijo, vuelva a intentarlo");
+                } else {
+                    return matches;
                 }
             }
         }
