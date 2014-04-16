@@ -48,8 +48,39 @@ public class AppMain {
 
             if(comando.equals("leer")) {
                 ResponseList<Status> timeline = twitter.getTimeLine();
+                int i = 0;
 
-                for(Status e : timeline) {
+                while(!comando.equals("salir")){
+                    Status e = timeline.get(i);
+                    mainActivity.speak(e.getUser().getName() + " dijo, " + e.getText());
+                    comando = mainActivity.listenSpeech().get(0);
+
+                    if(comando.equals("siguiente")){
+                        if(timeline.size() > (i + 1)){
+                            i++;
+                        }else
+                            mainActivity.speak("Usted está en el último tweet cargado");
+                        continue;
+                    }
+                    if(comando.equals("anterior")){
+                        if(i > 0){
+                            i--;
+                        }else
+                            mainActivity.speak("Usted está en el tweet cargado más reciente");
+                        continue;
+                    }
+                    if(comando.equals("retweet")) {
+                        twitter.retweet(e.getId());
+                        continue;
+                    }
+                    if(comando.equals("favorito")) {
+                        twitter.fav(e.getId());
+                        continue;
+                    }
+                    mainActivity.speak("Comando inválido");
+                }
+
+                /*for(Status e : timeline) {
                     mainActivity.speak(e.getUser().getName() + " dijo, " + e.getText());
                     comando = mainActivity.listenSpeech().get(0);
                     if(comando.equals("siguiente"))
@@ -65,7 +96,7 @@ public class AppMain {
                     if(comando.equals("salir"))
                         break;
                     mainActivity.speak("Comando inválido");
-                }
+                }*/
 
                 continue;
             }
