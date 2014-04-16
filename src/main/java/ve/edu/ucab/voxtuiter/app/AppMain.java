@@ -44,71 +44,63 @@ public class AppMain {
         while(true) {
             mainActivity.speak("Diga un comando");
             ArrayList<String> matches = mainActivity.listenSpeech();
-            String comando = matches.get(0);
+            String comand = matches.get(0);
 
-            if(comando.equals("leer")) {
+            if(comand.equals("leer")) {
                 ResponseList<Status> timeline = twitter.getTimeLine();
                 int i = 0;
+                boolean flag = true;
 
-                while(!comando.equals("salir")){
+                while(!comand.equals("salir")){
                     Status e = timeline.get(i);
-                    mainActivity.speak(e.getUser().getName() + " dijo, " + e.getText());
-                    comando = mainActivity.listenSpeech().get(0);
+                    if(flag)
+                        mainActivity.speak(e.getUser().getName() + " dijo, " + e.getText());
+                    comand = mainActivity.listenSpeech().get(0);
 
-                    if(comando.equals("siguiente")){
+                    if(comand.equals("siguiente")){
                         if(timeline.size() > (i + 1)){
                             i++;
-                        }else
+                            flag = true;
+                        }else{
                             mainActivity.speak("Usted está en el último tweet cargado");
+                            flag = false;
+                        }
                         continue;
                     }
-                    if(comando.equals("anterior")){
+                    if(comand.equals("anterior")){
                         if(i > 0){
                             i--;
-                        }else
+                            flag = true;
+                        }else{
                             mainActivity.speak("Usted está en el tweet cargado más reciente");
+                            flag = false;
+                        }
                         continue;
                     }
-                    if(comando.equals("retweet")) {
+                    if(comand.equals("retweet")) {
                         twitter.retweet(e.getId());
+                        flag = false;
                         continue;
                     }
-                    if(comando.equals("favorito")) {
+                    if(comand.equals("favorito")) {
                         twitter.fav(e.getId());
+                        flag = false;
                         continue;
                     }
                     mainActivity.speak("Comando inválido");
                 }
 
-                /*for(Status e : timeline) {
-                    mainActivity.speak(e.getUser().getName() + " dijo, " + e.getText());
-                    comando = mainActivity.listenSpeech().get(0);
-                    if(comando.equals("siguiente"))
-                        continue;
-                    if(comando.equals("retweet")) {
-                        twitter.retweet(e.getId());
-                        continue;
-                    }
-                    if(comando.equals("favorito")) {
-                        twitter.fav(e.getId());
-                        continue;
-                    }
-                    if(comando.equals("salir"))
-                        break;
-                    mainActivity.speak("Comando inválido");
-                }*/
-
                 continue;
             }
 
-            if(comando.equals("twittear")) {
+            if(comand.equals("twittear")) {
                 mainActivity.speak("Diga su tweet");
                 twitter.tweet(mainActivity.listenSpeech().get(0));
                 mainActivity.speak("Tweet publicado con éxito");
                 continue;
             }
 
-            if(comando.equals("salir")) {
+            if(comand.equals("salir")) {
                 System.exit(0);
             }
 

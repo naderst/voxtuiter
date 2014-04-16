@@ -26,8 +26,10 @@ import twitter4j.conf.ConfigurationBuilder;
 public class TwitterManager {
     private TwitterFactory tf;
     private Twitter twitter;
+    private MainActivity mainActivity;
 
     TwitterManager(MainActivity mainActivity) {
+        this.mainActivity = mainActivity;
         ConfigurationBuilder cb = new ConfigurationBuilder();
         /* Configuramos oAuth con las claves otorgadas por Twitter */
         cb.setDebugEnabled(true).setOAuthConsumerKey(Configuration.consumerKey)
@@ -91,7 +93,7 @@ public class TwitterManager {
         try {
             twitter.updateStatus(text);
         } catch (TwitterException e) {
-            e.printStackTrace();
+            mainActivity.speak("No se pudo escribir el tweet indicado");
         }
     }
 
@@ -104,7 +106,7 @@ public class TwitterManager {
         try {
             twitter.retweetStatus(tweetId);
         } catch (TwitterException e) {
-            e.printStackTrace();
+            mainActivity.speak("No se pudo hacer retweet en el tweet seleccionado");
         }
     }
 
@@ -117,7 +119,7 @@ public class TwitterManager {
         try {
             twitter.createFavorite(tweetId);
         } catch (TwitterException e) {
-            e.printStackTrace();
+            mainActivity.speak("No se pudo marcar como favorito el tweet seleccionado");
         }
     }
 
@@ -129,7 +131,7 @@ public class TwitterManager {
         try {
             return twitter.getHomeTimeline();
         } catch (TwitterException e) {
-            e.printStackTrace();
+            mainActivity.speak("No se pudo obtener el time line de twitter");
         }
         return null;
     }
