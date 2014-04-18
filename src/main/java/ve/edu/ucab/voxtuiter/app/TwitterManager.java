@@ -14,6 +14,7 @@ package ve.edu.ucab.voxtuiter.app;
 import twitter4j.QueryResult;
 import twitter4j.ResponseList;
 import twitter4j.Status;
+import twitter4j.StatusUpdate;
 import twitter4j.Trend;
 import twitter4j.Query;
 import twitter4j.Twitter;
@@ -126,6 +127,15 @@ public class TwitterManager {
             mainActivity.speak("Se marcó el tweet como favorito.");
         } catch (TwitterException e) {
             mainActivity.speak("No se pudo marcar como favorito el tweet seleccionado.");
+        }
+    }
+
+    public void reply(long tweetId, String reply){
+        try {
+            twitter.updateStatus(new StatusUpdate(reply).inReplyToStatusId(tweetId));
+            mainActivity.speak("Se ha respondido el tweet selecccionado con éxito.");
+        } catch (TwitterException e) {
+            mainActivity.speak("No se pudo responder el tweet seleccionado.");
         }
     }
 

@@ -14,11 +14,11 @@ package ve.edu.ucab.voxtuiter.app;
 import java.util.ArrayList;
 import java.util.List;
 
-import twitter4j.Query;
 import twitter4j.ResponseList;
 import twitter4j.Status;
 import twitter4j.Trend;
 import twitter4j.QueryResult;
+import twitter4j.TwitterException;
 
 enum Sitios {
     MENU, TIMELINE, TRENDSTITLES, TRENDS
@@ -49,7 +49,7 @@ public class AppMain {
     /**
      * Evento que se ejecuta cuando la aplicación está lista para empezar
      */
-    public void onInit() {
+    public void onInit() throws TwitterException {
         ubicacion = Sitios.MENU;
         ResponseList<Status> timeline = null;
         List<Status> trends = null;
@@ -188,18 +188,25 @@ public class AppMain {
                 continue;
             }
 
-            /*if(command.equals("responder")) {
-                switch (ubicacion){
-                    case TIMELINE:
-                        break;
-                    case TRENDS:
-                        break;
-                    default:
-                        mainActivity.speak("Comando no disponible.");
-                        break;
-                }
+            if(command.equals("responder")) {
+                mainActivity.speak("Indique su respuesta");
+                String reply;
+                if(!(reply = mainActivity.listenSpeech().get(0)).equals("cancelar")){
+                    switch (ubicacion){
+                        case TIMELINE:
+                            twitter.reply(timeline.get(i).getId(), reply);
+                            break;
+                        case TRENDS:
+                            twitter.reply(trends.get(j).getId(), reply);
+                            break;
+                        default:
+                            mainActivity.speak("Comando no disponible.");
+                            break;
+                    }
+                }else
+                    mainActivity.speak("La respuesta se ha cancelado.");
                 continue;
-            }*/
+            }
 
             if(command.equals("entrar")){
                 if(ubicacion == Sitios.TRENDSTITLES){
