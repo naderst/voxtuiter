@@ -11,8 +11,11 @@
  */
 package ve.edu.ucab.voxtuiter.app;
 
+import twitter4j.QueryResult;
 import twitter4j.ResponseList;
 import twitter4j.Status;
+import twitter4j.Trend;
+import twitter4j.Query;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
@@ -63,7 +66,7 @@ public class TwitterManager {
 
             AccessToken accessToken = null;
 
-            mainActivity.speak("Será enviado a la página de Twitter, inicie sesión y diga el número de PIN");
+            mainActivity.speak("Será enviado a la página de Twitter, inicie sesión y diga el número de PIN.");
             mainActivity.openURL(requestToken.getAuthorizationURL());
 
             try {
@@ -72,7 +75,7 @@ public class TwitterManager {
                 accessToken = twitter.getOAuthAccessToken(requestToken, pin);
             } catch (TwitterException te) {
                 if(te.getStatusCode() == 401) {
-                    mainActivity.speak("PIN incorrecto");
+                    mainActivity.speak("PIN incorrecto.");
                     System.exit(1);
                 } else {
                     te.printStackTrace();
@@ -92,9 +95,9 @@ public class TwitterManager {
     public void tweet(String text) {
         try {
             twitter.updateStatus(text);
-            mainActivity.speak("Tweet publicado con éxito");
+            mainActivity.speak("Tweet publicado con éxito.");
         } catch (TwitterException e) {
-            mainActivity.speak("No se pudo escribir el tweet indicado");
+            mainActivity.speak("No se pudo escribir el tweet indicado.");
         }
     }
 
@@ -106,9 +109,9 @@ public class TwitterManager {
     public void retweet(long tweetId) {
         try {
             twitter.retweetStatus(tweetId);
-            mainActivity.speak("Retweet exitoso");
+            mainActivity.speak("Retweet exitoso.");
         } catch (TwitterException e) {
-            mainActivity.speak("No se pudo hacer retweet en el tweet seleccionado");
+            mainActivity.speak("No se pudo hacer retweet en el tweet seleccionado.");
         }
     }
 
@@ -120,9 +123,9 @@ public class TwitterManager {
     public void fav(long tweetId) {
         try {
             twitter.createFavorite(tweetId);
-            mainActivity.speak("Se marcó el tweet como favorito");
+            mainActivity.speak("Se marcó el tweet como favorito.");
         } catch (TwitterException e) {
-            mainActivity.speak("No se pudo marcar como favorito el tweet seleccionado");
+            mainActivity.speak("No se pudo marcar como favorito el tweet seleccionado.");
         }
     }
 
@@ -134,7 +137,7 @@ public class TwitterManager {
         try {
             return twitter.getHomeTimeline();
         } catch (TwitterException e) {
-            mainActivity.speak("No se pudo obtener el time line de twitter");
+            mainActivity.speak("No se pudo obtener el time line de twitter.");
         }
         return null;
     }
@@ -142,5 +145,24 @@ public class TwitterManager {
     public void signOut(){
         mainActivity.save("accessToken", "");
         mainActivity.save("accessSecret", "");
+    }
+
+    public  Trend[] getTrendsTitles(){
+        try {
+            return twitter.getPlaceTrends(23424982).getTrends();
+        } catch (TwitterException e) {
+            mainActivity.speak("No se pudieron obtener las tendencias venezolanas de twitter.");
+        }
+        return null;
+    }
+
+    public QueryResult search(String text, String name){
+        try {
+            Query query = new Query(text);
+            return twitter.search(query);
+        } catch (TwitterException e){
+            mainActivity.speak("No se pudieron obtener los tweets de la tendencia" + name);
+        }
+        return null;
     }
 }

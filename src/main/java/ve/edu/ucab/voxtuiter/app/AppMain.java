@@ -12,9 +12,17 @@
 package ve.edu.ucab.voxtuiter.app;
 
 import java.util.ArrayList;
+import java.util.List;
 
+import twitter4j.Query;
 import twitter4j.ResponseList;
 import twitter4j.Status;
+import twitter4j.Trend;
+import twitter4j.QueryResult;
+
+enum Sitios {
+    MENU, TIMELINE, TRENDSTITLES, TRENDS
+}
 
 /**
  * La clase AppMain es una abstracción para manejar el flujo de la App
@@ -31,6 +39,8 @@ public class AppMain {
      */
     private TwitterManager twitter;
 
+    private Sitios ubicacion;
+
     AppMain(MainActivity mainActivity) {
         this.mainActivity = mainActivity;
         twitter = new TwitterManager(mainActivity);
@@ -40,77 +50,197 @@ public class AppMain {
      * Evento que se ejecuta cuando la aplicación está lista para empezar
      */
     public void onInit() {
+        ubicacion = Sitios.MENU;
+        ResponseList<Status> timeline = null;
+        List<Status> trends = null;
+        Trend[] trendsTitles = null;
+        ArrayList<String> matches = null;
+        boolean flagTimeline = false;
+        boolean flagTrends = false;
+        boolean flagTrendsTitles = false;
+        String command = "";
+        int i = 0, j = 0;
 
         while(true) {
-            mainActivity.speak("Diga un comando");
-            ArrayList<String> matches = mainActivity.listenSpeech();
-            String comand = matches.get(0);
+            if(!flagTimeline && !flagTrendsTitles && !flagTrends){
+                mainActivity.speak("Diga un comando");
+                matches = mainActivity.listenSpeech();
+                command = matches.get(0);
+            }else
+                if(flagTimeline)
+                    command = "leer";
+                else if(flagTrendsTitles)
+                    command = "tendencias";
+                else
+                    command = "entrar";
 
-            if(comand.equals("leer")) {
-                ResponseList<Status> timeline = twitter.getTimeLine();
-                int i = 0;
-                boolean flag = true;
-
-                while(!comand.equals("salir")){
-                    Status e = timeline.get(i);
-                    if(flag)
-                        mainActivity.speak(e.getUser().getName() + " dijo, " + e.getText());
-                    comand = mainActivity.listenSpeech().get(0);
-
-                    if(comand.equals("siguiente")){
-                        if(timeline.size() > (i + 1)){
-                            i++;
-                            flag = true;
-                        }else{
-                            mainActivity.speak("Usted está en el último tweet cargado");
-                            flag = false;
-                        }
+            if(command.equals("leer")) {
+                if(ubicacion != Sitios.TIMELINE){
+                    ubicacion = Sitios.TIMELINE;
+                    i = 0;
+                    if((timeline = twitter.getTimeLine()) == null)
                         continue;
-                    }
-                    if(comand.equals("anterior")){
-                        if(i > 0){
-                            i--;
-                            flag = true;
-                        }else{
-                            mainActivity.speak("Usted está en el tweet cargado más reciente");
-                            flag = false;
-                        }
-                        continue;
-                    }
-                    if(comand.equals("retweet")) {
-                        twitter.retweet(e.getId());
-                        flag = false;
-                        continue;
-                    }
-                    if(comand.equals("favorito")) {
-                        twitter.fav(e.getId());
-                        flag = false;
-                        continue;
-                    }
-                    mainActivity.speak("Comando inválido");
                 }
 
+                mainActivity.speak(timeline.get(i).getUser().getName() + " dijo, " + timeline.get(i).getText());
+                flagTimeline = false;
                 continue;
             }
 
-            if(comand.equals("twittear")) {
+            if(command.equals("tendencias")) {
+                if(ubicacion != Sitios.TRENDSTITLES){
+                    ubicacion = Sitios.TRENDSTITLES;
+                    i = 0;
+                    if((trendsTitles = twitter.getTrendsTitles()) == null)
+                        continue;
+                }
+
+                mainActivity.speak("La tendencia número" + (i+1) + "es la siguiente:" + trendsTitles[i].getName());
+                flagTrendsTitles = false;
+                continue;
+            }
+
+            if(command.equals("siguiente")){
+                switch (ubicacion){
+                    case TIMELINE:
+                        if(timeline.size() > (i + 1)){
+                            i++;
+                            flagTimeline = true;
+                        }else
+                            mainActivity.speak("Usted está en el último tweet cargado.");
+                        break;
+                    case TRENDSTITLES:
+                        if(trendsTitles.length > (i + 1)){
+                            i++;
+                            flagTrendsTitles = true;
+                        }else
+                            mainActivity.speak("Usted está en la última tendencia cargada.");
+                        break;
+                    case TRENDS:
+                        if(trends.size() > (j + 1)){
+                            j++;
+                            flagTrends = true;
+                        }else
+                            mainActivity.speak("Usted está en el último tweet cargado de la tendencia actual.");
+                        break;
+                    default:
+                        mainActivity.speak("Comando no disponible.");
+                        break;
+                }
+                continue;
+            }
+
+            if(command.equals("anterior")){
+                switch (ubicacion){
+                    case TIMELINE:
+                        if(i > 0){
+                            i--;
+                            flagTimeline = true;
+                        }else
+                            mainActivity.speak("Usted está en el tweet cargado más reciente.");
+                        break;
+                    case TRENDSTITLES:
+                        if(i > 0){
+                            i--;
+                            flagTrendsTitles = true;
+                        }else
+                            mainActivity.speak("Usted está en la tendencia cargada más reciente.");
+                        break;
+                    case TRENDS:
+                        if(trends.size() > (j + 1)){
+                            j++;
+                            flagTrends = true;
+                        }else
+                            mainActivity.speak("Usted está en el tweet cargado más reciente de la tendencia actual.");
+                        break;
+                    default:
+                        mainActivity.speak("Comando no disponible.");
+                        break;
+                }
+                continue;
+            }
+            if(command.equals("retweet")) {
+                switch (ubicacion){
+                    case TIMELINE:
+                        twitter.retweet(timeline.get(i).getId());
+                        break;
+                    case TRENDS:
+                        twitter.retweet(trends.get(j).getId());
+                        break;
+                    default:
+                        mainActivity.speak("Comando no disponible.");
+                        break;
+                }
+                continue;
+            }
+            if(command.equals("favorito")) {
+                switch (ubicacion){
+                    case TIMELINE:
+                        twitter.fav(timeline.get(i).getId());
+                        break;
+                    case TRENDS:
+                        twitter.fav(trends.get(j).getId());
+                        break;
+                    default:
+                        mainActivity.speak("Comando no disponible.");
+                        break;
+                }
+                continue;
+            }
+
+            /*if(command.equals("responder")) {
+                switch (ubicacion){
+                    case TIMELINE:
+                        break;
+                    case TRENDS:
+                        break;
+                    default:
+                        mainActivity.speak("Comando no disponible.");
+                        break;
+                }
+                continue;
+            }*/
+
+            if(command.equals("entrar")){
+                if(ubicacion == Sitios.TRENDSTITLES){
+                    ubicacion = Sitios.TRENDS;
+                    QueryResult result;
+                    if((result = twitter.search(trendsTitles[i].getQuery(), trendsTitles[i].getName())) != null){
+                        trends = result.getTweets();
+                        j = 0;
+                    }else
+                        continue;
+                }
+                if(ubicacion == Sitios.TRENDS){
+                    mainActivity.speak(trends.get(j).getUser().getName() + " dijo, " + trends.get(j).getText());
+                    flagTrends = false;
+                }else
+                    mainActivity.speak("Comando no disponible.");
+                continue;
+            }
+
+            if(command.equals("twittear")) {
                 String text;
                 mainActivity.speak("Diga su tweet");
-                if((text = mainActivity.listenSpeech().get(0)) != "cancelar")
+                if(!(text = mainActivity.listenSpeech().get(0)).equals("cancelar"))
                     twitter.tweet(text);
+                else
+                    mainActivity.speak("El tweet se ha cancelado.");
                 continue;
             }
 
-            if(comand.equals("salir")) {
+            if(command.equals("salir")) {
+                mainActivity.speak("Gracias por su visita, vuelva pronto");
                 System.exit(0);
             }
 
-            if(comand.equals("cerrar sesión")) {
+            if(command.equals("cerrar sesión")) {
                 twitter.signOut();
+                mainActivity.speak("Sesión finalizada con éxito. Cerrando aplicación");
                 System.exit(0);
             }
 
-            mainActivity.speak("Comando inválido, vuelva a intentarlo");
+            mainActivity.speak("Comando inválido, vuelva a intentarlo.");
 
             System.out.println(matches.toString());
         }
