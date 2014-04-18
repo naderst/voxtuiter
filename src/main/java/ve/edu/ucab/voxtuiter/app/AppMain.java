@@ -94,13 +94,19 @@ public class AppMain {
             }
 
             if(comand.equals("twittear")) {
+                String text;
                 mainActivity.speak("Diga su tweet");
-                twitter.tweet(mainActivity.listenSpeech().get(0));
-                mainActivity.speak("Tweet publicado con éxito");
+                if((text = mainActivity.listenSpeech().get(0)) != "cancelar")
+                    twitter.tweet(text);
                 continue;
             }
 
             if(comand.equals("salir")) {
+                System.exit(0);
+            }
+
+            if(comand.equals("cerrar sesión")) {
+                twitter.signOut();
                 System.exit(0);
             }
 

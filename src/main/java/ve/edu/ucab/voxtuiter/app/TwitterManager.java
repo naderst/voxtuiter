@@ -92,6 +92,7 @@ public class TwitterManager {
     public void tweet(String text) {
         try {
             twitter.updateStatus(text);
+            mainActivity.speak("Tweet publicado con éxito");
         } catch (TwitterException e) {
             mainActivity.speak("No se pudo escribir el tweet indicado");
         }
@@ -105,6 +106,7 @@ public class TwitterManager {
     public void retweet(long tweetId) {
         try {
             twitter.retweetStatus(tweetId);
+            mainActivity.speak("Retweet exitoso");
         } catch (TwitterException e) {
             mainActivity.speak("No se pudo hacer retweet en el tweet seleccionado");
         }
@@ -118,6 +120,7 @@ public class TwitterManager {
     public void fav(long tweetId) {
         try {
             twitter.createFavorite(tweetId);
+            mainActivity.speak("Se marcó el tweet como favorito");
         } catch (TwitterException e) {
             mainActivity.speak("No se pudo marcar como favorito el tweet seleccionado");
         }
@@ -134,5 +137,10 @@ public class TwitterManager {
             mainActivity.speak("No se pudo obtener el time line de twitter");
         }
         return null;
+    }
+
+    public void signOut(){
+        mainActivity.save("accessToken", "");
+        mainActivity.save("accessSecret", "");
     }
 }
