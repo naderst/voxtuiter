@@ -21,7 +21,7 @@ import twitter4j.QueryResult;
 import twitter4j.TwitterException;
 
 enum Sitios {
-    MENU, TIMELINE, TRENDSTITLES, TRENDS
+    MENU, TIMELINE, TRENDSTITLES, TRENDS, PROFILE
 }
 
 /**
@@ -233,6 +233,22 @@ public class AppMain {
                     twitter.tweet(text);
                 else
                     mainActivity.speak("El tweet se ha cancelado.");
+                continue;
+            }
+
+            if(command.equals("ver perfil")) {
+                ubicacion = Sitios.PROFILE;
+                switch (ubicacion){
+                    case TIMELINE:
+                        twitter.profile(timeline.get(i).getUser().getId());
+                        break;
+                    case TRENDS:
+                        twitter.profile(trends.get(j).getUser().getId());
+                        break;
+                    default:
+                        mainActivity.speak("Comando no disponible.");
+                        break;
+                }
                 continue;
             }
 

@@ -141,8 +141,24 @@ public class TwitterManager {
         }
     }
 
-    public void profile(){
-
+    public void profile(long userId){
+        try {
+            String description = twitter.showUser(userId).getDescription();
+            String location = twitter.showUser(userId).getLocation();
+            mainActivity.speak("Usted está visitando el perfil de: " + twitter.showUser(userId).getName());
+            if(!description.isEmpty())
+                mainActivity.speak("La descripción del usuario es: " + description);
+            if(!location.isEmpty())
+                mainActivity.speak("Se ubica en: " + location);
+            if(twitter.showUser(userId).isVerified())
+                mainActivity.speak("Este es un usuario verificado.");
+            mainActivity.speak("El usuario ha publicado: " + twitter.showUser(userId).getStatusesCount() + " tweets");
+            mainActivity.speak("Ha marcado: " + twitter.showUser(userId).getFavouritesCount() + " tweets como favorito");
+            mainActivity.speak("Tiene: " + twitter.showUser(userId).getFollowersCount() + " seguidores");
+            mainActivity.speak("Y sigue a: " + twitter.showUser(userId).getFriendsCount() + " usuarios");
+        } catch (TwitterException e) {
+            mainActivity.speak("No se pudo obtener el perfil del usuario indicado");
+        }
     }
 
     /**
@@ -177,7 +193,7 @@ public class TwitterManager {
             Query query = new Query(text);
             return twitter.search(query);
         } catch (TwitterException e){
-            mainActivity.speak("No se pudieron obtener los tweets de la tendencia" + name);
+            mainActivity.speak("No se pudieron obtener los tweets de la tendencia " + name);
         }
         return null;
     }
