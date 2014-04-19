@@ -130,13 +130,19 @@ public class TwitterManager {
         }
     }
 
-    public void reply(long tweetId, String reply){
+    public void reply(long tweetId, String reply, String screen_name){
         try {
-            twitter.updateStatus(new StatusUpdate(reply).inReplyToStatusId(tweetId));
+            StatusUpdate update = new StatusUpdate("@" + screen_name + " " + reply);
+            update.setInReplyToStatusId(tweetId);
+            twitter.updateStatus(update);
             mainActivity.speak("Se ha respondido el tweet selecccionado con éxito.");
         } catch (TwitterException e) {
             mainActivity.speak("No se pudo responder el tweet seleccionado.");
         }
+    }
+
+    public void profile(){
+
     }
 
     /**

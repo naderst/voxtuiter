@@ -49,7 +49,7 @@ public class AppMain {
     /**
      * Evento que se ejecuta cuando la aplicación está lista para empezar
      */
-    public void onInit() throws TwitterException {
+    public void onInit(){
         ubicacion = Sitios.MENU;
         ResponseList<Status> timeline = null;
         List<Status> trends = null;
@@ -194,10 +194,10 @@ public class AppMain {
                 if(!(reply = mainActivity.listenSpeech().get(0)).equals("cancelar")){
                     switch (ubicacion){
                         case TIMELINE:
-                            twitter.reply(timeline.get(i).getId(), reply);
+                            twitter.reply(timeline.get(i).getId(), reply, timeline.get(i).getUser().getScreenName());
                             break;
                         case TRENDS:
-                            twitter.reply(trends.get(j).getId(), reply);
+                            twitter.reply(trends.get(j).getId(), reply, trends.get(j).getUser().getScreenName());
                             break;
                         default:
                             mainActivity.speak("Comando no disponible.");
