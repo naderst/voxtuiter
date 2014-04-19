@@ -90,6 +90,8 @@ public class MainActivity extends ActionBarActivity implements TextToSpeech.OnIn
 
         myHashAlarm.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "FIN");
 
+        if(text.contains("#"))
+            text = text.replace("#", "hash tag");
         vox.speak(text, TextToSpeech.QUEUE_FLUSH, myHashAlarm);
 
         synchronized (this) {

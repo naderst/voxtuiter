@@ -152,13 +152,22 @@ public class TwitterManager {
                 mainActivity.speak("Se ubica en: " + location);
             if(twitter.showUser(userId).isVerified())
                 mainActivity.speak("Este es un usuario verificado.");
-            mainActivity.speak("El usuario ha publicado: " + twitter.showUser(userId).getStatusesCount() + " tweets");
-            mainActivity.speak("Ha marcado: " + twitter.showUser(userId).getFavouritesCount() + " tweets como favorito");
-            mainActivity.speak("Tiene: " + twitter.showUser(userId).getFollowersCount() + " seguidores");
-            mainActivity.speak("Y sigue a: " + twitter.showUser(userId).getFriendsCount() + " usuarios");
+            mainActivity.speak("El usuario ha publicado: " + twitter.showUser(userId).getStatusesCount() + " tweets.");
+            mainActivity.speak("Ha marcado: " + twitter.showUser(userId).getFavouritesCount() + " tweets como favorito.");
+            mainActivity.speak("Tiene: " + twitter.showUser(userId).getFollowersCount() + " seguidores.");
+            mainActivity.speak("Y sigue a: " + twitter.showUser(userId).getFriendsCount() + " usuarios.");
         } catch (TwitterException e) {
-            mainActivity.speak("No se pudo obtener el perfil del usuario indicado");
+            mainActivity.speak("No se pudo obtener el perfil del usuario indicado.");
         }
+    }
+
+    public ResponseList<Status> userTimeLine(long userId){
+        try {
+            return twitter.getUserTimeline(userId);
+        } catch (TwitterException e) {
+            mainActivity.speak("No se pudieron obtener los tweets del usuario indicado.");
+        }
+        return null;
     }
 
     /**
