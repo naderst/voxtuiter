@@ -20,6 +20,7 @@ import twitter4j.Query;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
+import twitter4j.User;
 import twitter4j.auth.AccessToken;
 import twitter4j.auth.RequestToken;
 import twitter4j.conf.ConfigurationBuilder;
@@ -95,8 +96,11 @@ public class TwitterManager {
      */
     public void tweet(String text) {
         try {
-            twitter.updateStatus(text);
-            mainActivity.speak("Tweet publicado con éxito.");
+            if(text.length() <= 140){
+                twitter.updateStatus(text);
+                mainActivity.speak("Tweet publicado con éxito.");
+            }else
+                mainActivity.speak("Error, el tweet debe contener máximo 140 caracteres");
         } catch (TwitterException e) {
             mainActivity.speak("No se pudo escribir el tweet indicado.");
         }
@@ -143,19 +147,20 @@ public class TwitterManager {
 
     public void profile(long userId){
         try {
-            String description = twitter.showUser(userId).getDescription();
-            String location = twitter.showUser(userId).getLocation();
-            mainActivity.speak("Usted está visitando el perfil de: " + twitter.showUser(userId).getName());
+            User user = twitter.showUser(userId);
+            String description = user.getDescription();
+            String location = user.getLocation();
+            mainActivity.speak("Usted está visitando el perfil de: " + user.getName());
             if(!description.isEmpty())
                 mainActivity.speak("La descripción del usuario es: " + description);
             if(!location.isEmpty())
                 mainActivity.speak("Se ubica en: " + location);
-            if(twitter.showUser(userId).isVerified())
-                mainActivity.speak("Este es un usuario verificado.");
-            mainActivity.speak("El usuario ha publicado: " + twitter.showUser(userId).getStatusesCount() + " tweets.");
-            mainActivity.speak("Ha marcado: " + twitter.showUser(userId).getFavouritesCount() + " tweets como favorito.");
-            mainActivity.speak("Tiene: " + twitter.showUser(userId).getFollowersCount() + " seguidores.");
-            mainActivity.speak("Y sigue a: " + twitter.showUser(userId).getFriendsCount() + " usuarios.");
+            if(user.isVerified())
+                mainActivity.speak("Este es un usuario verificado");
+            mainActivity.speak("El usuario ha publicado: " + user.getStatusesCount() + " tweets");
+            mainActivity.speak("Ha marcado: " + user.getFavouritesCount() + " tweets como favorito");
+            mainActivity.speak("Tiene: " + user.getFollowersCount() + " seguidores");
+            mainActivity.speak("Y sigue a: " + user.getFriendsCount() + " usuarios");
         } catch (TwitterException e) {
             mainActivity.speak("No se pudo obtener el perfil del usuario indicado.");
         }

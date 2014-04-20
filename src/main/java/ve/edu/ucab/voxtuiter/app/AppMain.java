@@ -16,9 +16,9 @@ import java.util.List;
 
 import twitter4j.ResponseList;
 import twitter4j.Status;
+import twitter4j.User;
 import twitter4j.Trend;
 import twitter4j.QueryResult;
-import twitter4j.TwitterException;
 
 enum Sitios {
     MENU, TIMELINE, TRENDSTITLES, TRENDS, PROFILE, PROFILE_TWEETS
@@ -40,6 +40,8 @@ public class AppMain {
     private TwitterManager twitter;
 
     private Sitios ubicacion;
+
+    private static short BLOCK = 100;
 
     AppMain(MainActivity mainActivity) {
         this.mainActivity = mainActivity;
@@ -145,8 +147,8 @@ public class AppMain {
                             mainActivity.speak("Usted está en la tendencia cargada más reciente.");
                         break;
                     case TRENDS:
-                        if(trends.size() > (j + 1)){
-                            j++;
+                        if(j > 0){
+                            j--;
                             flagTrends = true;
                         }else
                             mainActivity.speak("Usted está en el tweet cargado más reciente de la tendencia actual.");
@@ -196,7 +198,7 @@ public class AppMain {
             if(command.equals("responder")) {
                 mainActivity.speak("Indique su respuesta");
                 String reply;
-                if(!(reply = mainActivity.listenSpeech().get(0)).equals("cancelar")){
+                if(!(reply = mainActivity.listenSpeech().get(0)).equals("cancelar"))
                     switch (ubicacion){
                         case TRENDS:
                             twitter.reply(trends.get(j).getId(), reply, trends.get(j).getUser().getScreenName());
@@ -208,7 +210,7 @@ public class AppMain {
                                 mainActivity.speak("Comando no disponible.");
                             break;
                     }
-                }else
+                else
                     mainActivity.speak("La respuesta se ha cancelado.");
                 continue;
             }
@@ -257,7 +259,7 @@ public class AppMain {
                 continue;
             }
 
-            if(command.equals("ver tweets")){
+            if(command.equals("tweets")){
                 switch (ubicacion){
                     case TIMELINE:
                         if((timeline = twitter.userTimeLine(timeline.get(i).getUser().getId())) != null){
@@ -299,7 +301,7 @@ public class AppMain {
 
             if(command.equals("cerrar sesión")) {
                 twitter.signOut();
-                mainActivity.speak("Sesión finalizada con éxito. Cerrando aplicación");
+                mainActivity.speak("Sesión finalizada con éxito. Cerrando aplicación, gracias por visitarnos vuelva pronto");
                 System.exit(0);
             }
 
