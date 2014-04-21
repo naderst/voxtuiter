@@ -162,13 +162,13 @@ public class TwitterManager {
                 mainActivity.speak("Fue publicado desde: " + tweet.getGeoLocation().toString());
             if(tweet.getPlace() != null && !tweet.getPlace().getFullName().isEmpty())
                 mainActivity.speak("Se adjunto la ubicación: " + tweet.getPlace().getFullName() + " en este tweet");
-            if(tweet.isRetweeted())
+            if(tweet.getRetweetCount() > 0)
                 mainActivity.speak("Ha sido retuiteado " + tweet.getRetweetCount() + " veces");
             else
                 mainActivity.speak("Todavía no ha sido retuiteado");
             if(tweet.isRetweetedByMe())
                 mainActivity.speak("Y usted lo ha retuiteado");
-            if(tweet.isFavorited())
+            if(tweet.getFavoriteCount() > 0)
                 mainActivity.speak("Ha sido marcado como favorito " + tweet.getFavoriteCount() + " veces");
             else
                 mainActivity.speak("Todavía no ha sido marcado como favorito");
