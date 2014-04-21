@@ -205,8 +205,11 @@ public class TwitterManager {
 
     public void follow(long userId){
         try {
-            twitter.createFriendship(userId);
-            mainActivity.speak("Ahora sigue a este usuario.");
+            if(!twitter.showFriendship(twitter.getOAuthAccessToken().getUserId(),userId).isSourceFollowingTarget()){
+                twitter.createFriendship(userId, true);
+                mainActivity.speak("Ahora sigue a este usuario.");
+            }else
+                mainActivity.speak("Usted ya sigue a este usuario desde antes.");
         } catch (TwitterException e) {
             mainActivity.speak("No se pudo seguir al usuario indicado.");
         }
@@ -214,8 +217,11 @@ public class TwitterManager {
 
     public void unfollow(long userId){
         try {
-            twitter.destroyFriendship(userId);
-            mainActivity.speak("Ya no sigue a este usuario.");
+            if(twitter.showFriendship(twitter.getOAuthAccessToken().getUserId(),userId).isSourceFollowingTarget()){
+                twitter.destroyFriendship(userId);
+                mainActivity.speak("Ya no sigue a este usuario.");
+            }else
+                mainActivity.speak("Usted no sigue a este usuario desde antes.");
         } catch (TwitterException e) {
             mainActivity.speak("No se pudo deshacer el seguimiento al usuario indicado.");
         }
