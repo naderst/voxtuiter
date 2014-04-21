@@ -157,15 +157,21 @@ public class TwitterManager {
     public void moreInformation(long tweetId){
         try {
             Status tweet = twitter.showStatus(tweetId);
-            mainActivity.speak("Este tuit fue creado: " + tweet.getCreatedAt().toString());
-            if(!tweet.getGeoLocation().toString().matches(".*\\d+.*"))
+            mainActivity.speak("Este tuit fue creado en el: " + tweet.getCreatedAt().toString());
+            if(tweet.getGeoLocation() != null && !tweet.getGeoLocation().toString().matches(".*\\d+.*"))
                 mainActivity.speak("Fue publicado desde: " + tweet.getGeoLocation().toString());
-            if(!tweet.getPlace().getFullName().isEmpty())
+            if(tweet.getPlace() != null && !tweet.getPlace().getFullName().isEmpty())
                 mainActivity.speak("Se adjunto la ubicación: " + tweet.getPlace().getFullName() + " en este tweet");
-            mainActivity.speak("Ha sido retuiteado " + tweet.getRetweetCount() + " veces");
+            if(tweet.isRetweeted())
+                mainActivity.speak("Ha sido retuiteado " + tweet.getRetweetCount() + " veces");
+            else
+                mainActivity.speak("Todavía no ha sido retuiteado");
             if(tweet.isRetweetedByMe())
                 mainActivity.speak("Y usted lo ha retuiteado");
-            mainActivity.speak("Ha sido marcado como favorito " + tweet.getFavoriteCount() + " veces");
+            if(tweet.isFavorited())
+                mainActivity.speak("Ha sido marcado como favorito " + tweet.getFavoriteCount() + " veces");
+            else
+                mainActivity.speak("Todavía no ha sido marcado como favorito");
         } catch (TwitterException e) {
             mainActivity.speak("No se pudo obtener más información del tweet indicado.");
         }
