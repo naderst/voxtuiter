@@ -174,6 +174,7 @@ public class TwitterManager {
     public void profile(long userId){
         try {
             User user = twitter.showUser(userId);
+            AccessToken accessToken = twitter.getOAuthAccessToken();
             long myUserId = accessToken.getUserId();
             Relationship relationship = twitter.showFriendship(myUserId, userId);
             String description = user.getDescription();
