@@ -74,7 +74,7 @@ public class AppMain {
                     if(ubicacion == Sitios.TIMELINE)
                         command = "leer";
                     else
-                        command = "ver tweets";
+                        command = "historial de mensajes";
                 else if(flagTrendsTitles)
                     command = "tendencias";
                 else
