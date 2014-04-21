@@ -194,6 +194,20 @@ public class AppMain {
                 }
                 continue;
             }
+            if(command.equals("quitar de favoritos")) {
+                switch (ubicacion){
+                    case TRENDS:
+                        twitter.removeFav(trends.get(j).getId());
+                        break;
+                    default:
+                        if(ubicacion == Sitios.TIMELINE || ubicacion == Sitios.PROFILE_TWEETS)
+                            twitter.removeFav(timeline.get(i).getId());
+                        else
+                            mainActivity.speak("Comando no disponible.");
+                        break;
+                }
+                continue;
+            }
 
             if(command.equals("responder")) {
                 mainActivity.speak("Indique su respuesta");
@@ -212,6 +226,21 @@ public class AppMain {
                     }
                 else
                     mainActivity.speak("La respuesta se ha cancelado.");
+                continue;
+            }
+
+            if(command.equals("más información")){
+                switch (ubicacion){
+                    case TRENDS:
+                        twitter.moreInformation(trends.get(j).getId());
+                        break;
+                    default:
+                        if(ubicacion == Sitios.TIMELINE || ubicacion == Sitios.PROFILE_TWEETS)
+                            twitter.moreInformation(timeline.get(i).getId());
+                        else
+                            mainActivity.speak("Comando no disponible.");
+                        break;
+                }
                 continue;
             }
 
@@ -243,10 +272,13 @@ public class AppMain {
                 continue;
             }
 
-            if(command.equals("ver perfil")) {
+            if(command.equals("perfil")) {
                 switch (ubicacion){
                     case TRENDS:
                         twitter.profile(userId = trends.get(j).getUser().getId());
+                        break;
+                    case PROFILE:
+                        twitter.profile(userId);
                         break;
                     default:
                         if(ubicacion == Sitios.TIMELINE || ubicacion == Sitios.PROFILE_TWEETS)
@@ -259,7 +291,43 @@ public class AppMain {
                 continue;
             }
 
-            if(command.equals("tweets")){
+            if(command.equals("seguir")){
+                switch (ubicacion){
+                    case TRENDS:
+                        twitter.follow(trends.get(j).getUser().getId());
+                        break;
+                    case PROFILE:
+                        twitter.follow(userId);
+                        break;
+                    default:
+                        if(ubicacion == Sitios.TIMELINE || ubicacion == Sitios.PROFILE_TWEETS)
+                            twitter.follow(timeline.get(i).getUser().getId());
+                        else
+                            mainActivity.speak("Comando no disponible.");
+                        break;
+                }
+                continue;
+            }
+
+            if(command.equals("no seguir")){
+                switch (ubicacion){
+                    case TRENDS:
+                        twitter.unfollow(trends.get(j).getUser().getId());
+                        break;
+                    case PROFILE:
+                        twitter.unfollow(userId);
+                        break;
+                    default:
+                        if(ubicacion == Sitios.TIMELINE || ubicacion == Sitios.PROFILE_TWEETS)
+                            twitter.unfollow(timeline.get(i).getUser().getId());
+                        else
+                            mainActivity.speak("Comando no disponible.");
+                        break;
+                }
+                continue;
+            }
+
+            if(command.equals("historial de mensajes")){
                 switch (ubicacion){
                     case TIMELINE:
                         if((timeline = twitter.userTimeLine(timeline.get(i).getUser().getId())) != null){

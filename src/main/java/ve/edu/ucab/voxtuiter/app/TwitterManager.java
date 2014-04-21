@@ -12,11 +12,13 @@
 package ve.edu.ucab.voxtuiter.app;
 
 import twitter4j.QueryResult;
+import twitter4j.Relationship;
 import twitter4j.ResponseList;
 import twitter4j.Status;
 import twitter4j.StatusUpdate;
 import twitter4j.Trend;
 import twitter4j.Query;
+import twitter4j.Relationship;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
@@ -32,6 +34,7 @@ public class TwitterManager {
     private TwitterFactory tf;
     private Twitter twitter;
     private MainActivity mainActivity;
+    private AccessToken accessToken = null;
 
     TwitterManager(MainActivity mainActivity) {
         this.mainActivity = mainActivity;
@@ -65,8 +68,6 @@ public class TwitterManager {
             } catch (TwitterException e) {
                 e.printStackTrace();
             }
-
-            AccessToken accessToken = null;
 
             mainActivity.speak("Será enviado a la página de Twitter, inicie sesión y diga el número de PIN.");
             mainActivity.openURL(requestToken.getAuthorizationURL());
@@ -133,6 +134,14 @@ public class TwitterManager {
             mainActivity.speak("No se pudo marcar como favorito el tweet seleccionado.");
         }
     }
+    public void removeFav(long tweetId) {
+        try {
+            twitter.destroyFavorite(tweetId);
+            mainActivity.speak("Se removió el tweet de sus favoritos.");
+        } catch (TwitterException e) {
+            mainActivity.speak("No se pudo remover el tweet de sus favoritos.");
+        }
+    }
 
     public void reply(long tweetId, String reply, String screen_name){
         try {
@@ -145,24 +154,69 @@ public class TwitterManager {
         }
     }
 
+    public void moreInformation(long tweetId){
+        try {
+            Status tweet = twitter.showStatus(tweetId);
+            mainActivity.speak("Este tuit fue creado: " + tweet.getCreatedAt().toString());
+            if(!tweet.getGeoLocation().toString().matches(".*\\d+.*"))
+                mainActivity.speak("Fue publicado desde: " + tweet.getGeoLocation().toString());
+            if(!tweet.getPlace().getFullName().isEmpty())
+                mainActivity.speak("Se adjunto la ubicación: " + tweet.getPlace().getFullName() + " en este tweet");
+            mainActivity.speak("Ha sido retuiteado " + tweet.getRetweetCount() + " veces");
+            if(tweet.isRetweetedByMe())
+                mainActivity.speak("Y usted lo ha retuiteado");
+            mainActivity.speak("Ha sido marcado como favorito " + tweet.getFavoriteCount() + " veces");
+        } catch (TwitterException e) {
+            mainActivity.speak("No se pudo obtener más información del tweet indicado.");
+        }
+    }
+
     public void profile(long userId){
         try {
             User user = twitter.showUser(userId);
+            long myUserId = accessToken.getUserId();
+            Relationship relationship = twitter.showFriendship(myUserId, userId);
             String description = user.getDescription();
             String location = user.getLocation();
             mainActivity.speak("Usted está visitando el perfil de: " + user.getName());
             if(!description.isEmpty())
                 mainActivity.speak("La descripción del usuario es: " + description);
-            if(!location.isEmpty())
+            if(!location.isEmpty() && !location.matches(".*\\d+.*"))
                 mainActivity.speak("Se ubica en: " + location);
             if(user.isVerified())
                 mainActivity.speak("Este es un usuario verificado");
+            if(relationship.isSourceFollowingTarget() && twitter.showFriendship(myUserId, userId).isSourceFollowedByTarget())
+                mainActivity.speak("Usted sigue a este usuario y él también lo sigue");
+            else if(relationship.isSourceFollowingTarget())
+                mainActivity.speak("Usted sigue a este usuario pero el no lo sigue");
+            else if(relationship.isSourceFollowedByTarget())
+                mainActivity.speak("Este usuario lo sigue pero usted no");
+            else if(relationship.isSourceBlockingTarget())
+                mainActivity.speak("Usted ha bloqueado a este usuario");
             mainActivity.speak("El usuario ha publicado: " + user.getStatusesCount() + " tweets");
             mainActivity.speak("Ha marcado: " + user.getFavouritesCount() + " tweets como favorito");
             mainActivity.speak("Tiene: " + user.getFollowersCount() + " seguidores");
             mainActivity.speak("Y sigue a: " + user.getFriendsCount() + " usuarios");
         } catch (TwitterException e) {
             mainActivity.speak("No se pudo obtener el perfil del usuario indicado.");
+        }
+    }
+
+    public void follow(long userId){
+        try {
+            twitter.createFriendship(userId);
+            mainActivity.speak("Ahora sigue a este usuario.");
+        } catch (TwitterException e) {
+            mainActivity.speak("No se pudo seguir al usuario indicado.");
+        }
+    }
+
+    public void unfollow(long userId){
+        try {
+            twitter.destroyFriendship(userId);
+            mainActivity.speak("Ya no sigue a este usuario.");
+        } catch (TwitterException e) {
+            mainActivity.speak("No se pudo deshacer el seguimiento al usuario indicado.");
         }
     }
 
