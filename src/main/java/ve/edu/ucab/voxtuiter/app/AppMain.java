@@ -57,13 +57,14 @@ public class AppMain {
         boolean flagTimeline = false;
         boolean flagTrends = false;
         boolean flagTrendsTitles = false;
+        boolean flagEnd = false;
         String command = "";
         int i = 0, j = 0;
         long userId = 0;
 
         while(true) {
             if(!flagTimeline && !flagTrendsTitles && !flagTrends){
-                if(ubicacion == Sitios.TIMELINE || ubicacion == Sitios.PROFILE_TWEETS || ubicacion == Sitios.TRENDSTITLES || ubicacion == Sitios.TRENDS) {
+                if((ubicacion == Sitios.TIMELINE || ubicacion == Sitios.PROFILE_TWEETS || ubicacion == Sitios.TRENDSTITLES || ubicacion == Sitios.TRENDS) && !flagEnd) {
                     if((matches = mainActivity.listenSpeech(5000)) != null)
                         command = matches.get(0);
                     else
@@ -90,6 +91,7 @@ public class AppMain {
                     i = 0;
                     if((timeline = twitter.getTimeLine()) == null)
                         continue;
+                    flagEnd = false;
                 }
 
                 mainActivity.speak(timeline.get(i).getUser().getName() + " dijo, " + timeline.get(i).getText());
@@ -104,6 +106,7 @@ public class AppMain {
                     ubicacion = Sitios.TRENDSTITLES;
                     if((trendsTitles = twitter.getTrendsTitles()) == null)
                         continue;
+                    flagEnd = false;
                 }
 
                 mainActivity.speak("La tendencia número" + (i+1) + "es la siguiente:" + trendsTitles[i].getName());
@@ -112,28 +115,34 @@ public class AppMain {
             }
 
             if(command.equals("siguiente")){
-                switch (ubicacion){
+                switch (ubicacion) {
                     case TRENDSTITLES:
-                        if(trendsTitles.length > (i + 1)){
+                        if (trendsTitles.length > (i + 1)) {
                             i++;
                             flagTrendsTitles = true;
-                        }else
+                        } else {
                             mainActivity.speak("Usted está en la última tendencia cargada.");
+                            flagEnd = true;
+                        }
                         break;
                     case TRENDS:
-                        if(trends.size() > (j + 1)){
+                        if (trends.size() > (j + 1)) {
                             j++;
                             flagTrends = true;
-                        }else
+                        } else{
                             mainActivity.speak("Usted está en el último tweet cargado de la tendencia actual.");
+                            flagEnd = true;
+                        }
                         break;
                     default:
                         if(ubicacion == Sitios.TIMELINE || ubicacion == Sitios.PROFILE_TWEETS)
                             if(timeline.size() > (i + 1)){
                                 i++;
                                 flagTimeline = true;
-                            }else
+                            }else {
                                 mainActivity.speak("Usted está en el último tweet cargado.");
+                                flagEnd = true;
+                            }
                         else
                             mainActivity.speak("Comando no disponible.");
                         break;
@@ -255,6 +264,7 @@ public class AppMain {
                     if((result = twitter.search(trendsTitles[i].getQuery(), trendsTitles[i].getName())) != null){
                         trends = result.getTweets();
                         j = 0;
+                        flagEnd = false;
                     }else
                         continue;
                 }
@@ -336,6 +346,7 @@ public class AppMain {
                     case TIMELINE:
                         if((timeline = twitter.userTimeLine(timeline.get(i).getUser().getId())) != null){
                             i = 0;
+                            flagEnd = false;
                             ubicacion = Sitios.PROFILE_TWEETS;
                         }else
                             continue;
@@ -343,6 +354,7 @@ public class AppMain {
                     case TRENDS:
                         if((timeline = twitter.userTimeLine(trends.get(j).getUser().getId())) != null){
                             i = 0;
+                            flagEnd = false;
                             ubicacion = Sitios.PROFILE_TWEETS;
                         }else
                             continue;
@@ -350,6 +362,7 @@ public class AppMain {
                     case PROFILE:
                         if((timeline = twitter.userTimeLine(userId)) != null){
                             i = 0;
+                            flagEnd = false;
                             ubicacion = Sitios.PROFILE_TWEETS;
                         }else
                             continue;
