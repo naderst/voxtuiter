@@ -73,7 +73,7 @@ public class TwitterManager {
             mainActivity.openURL(requestToken.getAuthorizationURL());
 
             try {
-                String pin = mainActivity.listenSpeech().get(0).replace(" ", "");
+                String pin = mainActivity.listenSpeech(15000).get(0).replace(" ", "");
                 System.out.println(pin);
                 accessToken = twitter.getOAuthAccessToken(requestToken, pin);
             } catch (TwitterException te) {

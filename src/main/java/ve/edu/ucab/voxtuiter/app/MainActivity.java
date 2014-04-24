@@ -56,7 +56,7 @@ public class MainActivity extends ActionBarActivity implements TextToSpeech.OnIn
      *
      * @return Lista de frases escuchadas
      */
-    public ArrayList<String> listenSpeech() {
+    public ArrayList<String> listenSpeech(long timer) {
         while(true) {
             startActivityForResult(intent, REQUEST_CODE);
 
@@ -64,14 +64,17 @@ public class MainActivity extends ActionBarActivity implements TextToSpeech.OnIn
                 matches.clear();
 
                 try {
-                    matches.wait(15000); // El hilo se bloquea hasta que el usuario termine de hablar
+                    matches.wait(timer); // El hilo se bloquea hasta que el usuario termine de hablar
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
 
                 if(matches.isEmpty()) {
                     /* Ha pasado mucho tiempo y el usuario no ha dicho nada? */
-                    speak("Lo siento, no escuché lo que dijo, vuelva a intentarlo");
+                    if(timer > 5000)
+                        speak("Lo siento, no escuché lo que dijo, vuelva a intentarlo");
+                    else
+                        return null;
                 } else {
                     return matches;
                 }

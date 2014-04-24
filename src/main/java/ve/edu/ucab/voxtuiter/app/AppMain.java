@@ -63,9 +63,16 @@ public class AppMain {
 
         while(true) {
             if(!flagTimeline && !flagTrendsTitles && !flagTrends){
-                mainActivity.speak("Diga un comando");
-                matches = mainActivity.listenSpeech();
-                command = matches.get(0);
+                if(ubicacion == Sitios.TIMELINE || ubicacion == Sitios.PROFILE_TWEETS || ubicacion == Sitios.TRENDSTITLES || ubicacion == Sitios.TRENDS) {
+                    if((matches = mainActivity.listenSpeech(5000)) != null)
+                        command = matches.get(0);
+                    else
+                        command = "siguiente";
+                }else {
+                    mainActivity.speak("Diga un comando");
+                    matches = mainActivity.listenSpeech(15000);
+                    command = matches.get(0);
+                }
             }else
                 if(flagTimeline)
                     if(ubicacion == Sitios.TIMELINE)
@@ -209,7 +216,7 @@ public class AppMain {
             if(command.equals("responder")) {
                 mainActivity.speak("Indique su respuesta");
                 String reply;
-                if(!(reply = mainActivity.listenSpeech().get(0)).equals("cancelar"))
+                if(!(reply = mainActivity.listenSpeech(15000).get(0)).equals("cancelar"))
                     switch (ubicacion){
                         case TRENDS:
                             twitter.reply(trends.get(j).getId(), reply, trends.get(j).getUser().getScreenName());
@@ -262,7 +269,7 @@ public class AppMain {
             if(command.equals("twittear")) {
                 String text;
                 mainActivity.speak("Diga su tweet");
-                if(!(text = mainActivity.listenSpeech().get(0)).equals("cancelar"))
+                if(!(text = mainActivity.listenSpeech(15000).get(0)).equals("cancelar"))
                     twitter.tweet(text);
                 else
                     mainActivity.speak("El tweet se ha cancelado.");
