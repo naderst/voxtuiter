@@ -14,11 +14,10 @@ package ve.edu.ucab.voxtuiter.app;
 import java.util.ArrayList;
 import java.util.List;
 
+import twitter4j.QueryResult;
 import twitter4j.ResponseList;
 import twitter4j.Status;
-import twitter4j.User;
 import twitter4j.Trend;
-import twitter4j.QueryResult;
 
 enum Sitios {
     MENU, TIMELINE, TRENDSTITLES, TRENDS, PROFILE, PROFILE_TWEETS
@@ -40,8 +39,6 @@ public class AppMain {
     private TwitterManager twitter;
 
     private Sitios ubicacion;
-
-    private static short BLOCK = 100;
 
     AppMain(MainActivity mainActivity) {
         this.mainActivity = mainActivity;
