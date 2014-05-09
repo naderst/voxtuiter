@@ -20,7 +20,7 @@ import twitter4j.Status;
 import twitter4j.Trend;
 
 enum Sitios {
-    MENU, TIMELINE, TRENDSTITLES, TRENDS, PROFILE, PROFILE_TWEETS
+    MENU, TIMELINE, TRENDSTITLES, TRENDS, MY_PROFILE, PROFILE, PROFILE_TWEETS
 }
 
 /**
@@ -307,6 +307,12 @@ public class AppMain {
                 continue;
             }
 
+            if(command.equals("mi perfil")) {
+                ubicacion = Sitios.MY_PROFILE;
+                twitter.myProfile();
+                continue;
+            }
+
             if(command.equals("seguir")){
                 switch (ubicacion){
                     case TRENDS:
@@ -351,6 +357,10 @@ public class AppMain {
                         break;
                     case PROFILE:
                         if((timeline = twitter.userTimeLine(userId)) == null)
+                            continue;
+                        break;
+                    case MY_PROFILE:
+                        if((timeline = twitter.myTimeLine()) == null)
                             continue;
                         break;
                     default:

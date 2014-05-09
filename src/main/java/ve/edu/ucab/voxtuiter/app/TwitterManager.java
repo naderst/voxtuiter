@@ -209,6 +209,28 @@ public class TwitterManager {
         }
     }
 
+    public void myProfile(){
+        try {
+            AccessToken accessToken = twitter.getOAuthAccessToken();
+            User user = twitter.showUser(accessToken.getUserId());
+            String description = user.getDescription();
+            String location = user.getLocation();
+            mainActivity.speak("El nombre de su perfil es: " + user.getName());
+            if(!description.isEmpty())
+                mainActivity.speak("Su descripción es: " + description);
+            if(!location.isEmpty() && !location.matches(".*\\d+.*"))
+                mainActivity.speak("Se ubica en: " + location);
+            if(user.isVerified())
+                mainActivity.speak("Usted es un usuario verificado");
+            mainActivity.speak("Usted ha publicado: " + user.getStatusesCount() + " tweets");
+            mainActivity.speak("Ha marcado: " + user.getFavouritesCount() + " tweets como favorito");
+            mainActivity.speak("Tiene: " + user.getFollowersCount() + " seguidores");
+            mainActivity.speak("Y sigue a: " + user.getFriendsCount() + " usuarios");
+        } catch (TwitterException e) {
+            mainActivity.speak("No se pudo obtener su perfil.");
+        }
+    }
+
     public void follow(long userId){
         try {
             if(!twitter.showFriendship(twitter.getOAuthAccessToken().getUserId(),userId).isSourceFollowingTarget()){
@@ -236,6 +258,15 @@ public class TwitterManager {
     public ResponseList<Status> userTimeLine(long userId){
         try {
             return twitter.getUserTimeline(userId);
+        } catch (TwitterException e) {
+            mainActivity.speak("No se pudieron obtener los tweets del usuario indicado.");
+        }
+        return null;
+    }
+
+    public ResponseList<Status> myTimeLine(){
+        try {
+            return twitter.getUserTimeline(twitter.getOAuthAccessToken().getUserId());
         } catch (TwitterException e) {
             mainActivity.speak("No se pudieron obtener los tweets del usuario indicado.");
         }
