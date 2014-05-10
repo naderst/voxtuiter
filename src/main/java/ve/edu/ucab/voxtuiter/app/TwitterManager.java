@@ -268,7 +268,16 @@ public class TwitterManager {
         try {
             return twitter.getUserTimeline(twitter.getOAuthAccessToken().getUserId());
         } catch (TwitterException e) {
-            mainActivity.speak("No se pudieron obtener los tweets del usuario indicado.");
+            mainActivity.speak("No se pudieron obtener sus tweets.");
+        }
+        return null;
+    }
+
+    public ResponseList<Status> getMentions(){
+        try {
+            return twitter.getMentionsTimeline();
+        } catch (TwitterException e) {
+            mainActivity.speak("No se pudieron obtener sus notificaciones.");
         }
         return null;
     }
@@ -281,7 +290,7 @@ public class TwitterManager {
         try {
             return twitter.getHomeTimeline();
         } catch (TwitterException e) {
-            mainActivity.speak("No se pudo obtener el time line de twitter.");
+            mainActivity.speak("No se pudo obtener su time line.");
         }
         return null;
     }
@@ -295,7 +304,7 @@ public class TwitterManager {
         try {
             return twitter.getPlaceTrends(23424982).getTrends();
         } catch (TwitterException e) {
-            mainActivity.speak("No se pudieron obtener las tendencias venezolanas de twitter.");
+            mainActivity.speak("No se pudieron obtener de twitter las 10 tendencias de Venezuela.");
         }
         return null;
     }

@@ -20,7 +20,7 @@ import twitter4j.Status;
 import twitter4j.Trend;
 
 enum Sitios {
-    MENU, TIMELINE, TRENDSTITLES, TRENDS, MY_PROFILE, PROFILE, PROFILE_TWEETS
+    MENU, TIMELINE, TRENDSTITLES, TRENDS, MY_PROFILE, PROFILE, PROFILE_TWEETS, MENTIONS
 }
 
 /**
@@ -88,7 +88,7 @@ public class AppMain {
                         twitter.profile(userId);
                         break;
                     default:
-                        if (ubicacion == Sitios.TIMELINE || ubicacion == Sitios.PROFILE_TWEETS)
+                        if (ubicacion == Sitios.TIMELINE || ubicacion == Sitios.PROFILE_TWEETS || ubicacion == Sitios.MENTIONS)
                             mainActivity.speak(timeline.get(i).getUser().getName() + " dijo, " + timeline.get(i).getText());
                         else{
                             mainActivity.speak("Comando no disponible.");
@@ -123,6 +123,15 @@ public class AppMain {
                 continue;
             }
 
+            if(command.equals("menciones")) {
+                ubicacion = Sitios.MENTIONS;
+                if((timeline = twitter.getMentions()) != null) {
+                    flagEnd = false;
+                    mainActivity.speak(timeline.get(i).getUser().getName() + " dijo, " + timeline.get(i).getText());
+                }
+                continue;
+            }
+
             if(command.equals("siguiente")){
                 switch (ubicacion) {
                     case TRENDSTITLES:
@@ -144,7 +153,7 @@ public class AppMain {
                         }
                         break;
                     default:
-                        if(ubicacion == Sitios.TIMELINE || ubicacion == Sitios.PROFILE_TWEETS)
+                        if(ubicacion == Sitios.TIMELINE || ubicacion == Sitios.PROFILE_TWEETS || ubicacion == Sitios.MENTIONS)
                             if(timeline.size() > (i + 1)){
                                 i++;
                                 flagRepeat = true;
@@ -176,7 +185,7 @@ public class AppMain {
                             mainActivity.speak("Usted está en el tweet cargado más reciente de la tendencia actual.");
                         break;
                     default:
-                        if(ubicacion == Sitios.TIMELINE || ubicacion == Sitios.PROFILE_TWEETS)
+                        if(ubicacion == Sitios.TIMELINE || ubicacion == Sitios.PROFILE_TWEETS || ubicacion == Sitios.MENTIONS)
                             if(i > 0){
                                 i--;
                                 flagRepeat = true;
@@ -194,7 +203,7 @@ public class AppMain {
                         twitter.retweet(trends.get(j).getId());
                         break;
                     default:
-                        if(ubicacion == Sitios.TIMELINE || ubicacion == Sitios.PROFILE_TWEETS)
+                        if(ubicacion == Sitios.TIMELINE || ubicacion == Sitios.PROFILE_TWEETS || ubicacion == Sitios.MENTIONS)
                             twitter.retweet(timeline.get(i).getId());
                         else
                             mainActivity.speak("Comando no disponible.");
@@ -208,7 +217,7 @@ public class AppMain {
                         twitter.fav(trends.get(j).getId());
                         break;
                     default:
-                        if(ubicacion == Sitios.TIMELINE || ubicacion == Sitios.PROFILE_TWEETS)
+                        if(ubicacion == Sitios.TIMELINE || ubicacion == Sitios.PROFILE_TWEETS || ubicacion == Sitios.MENTIONS)
                             twitter.fav(timeline.get(i).getId());
                         else
                             mainActivity.speak("Comando no disponible.");
@@ -222,7 +231,7 @@ public class AppMain {
                         twitter.removeFav(trends.get(j).getId());
                         break;
                     default:
-                        if(ubicacion == Sitios.TIMELINE || ubicacion == Sitios.PROFILE_TWEETS)
+                        if(ubicacion == Sitios.TIMELINE || ubicacion == Sitios.PROFILE_TWEETS || ubicacion == Sitios.MENTIONS)
                             twitter.removeFav(timeline.get(i).getId());
                         else
                             mainActivity.speak("Comando no disponible.");
@@ -240,7 +249,7 @@ public class AppMain {
                             twitter.reply(trends.get(j).getId(), reply, trends.get(j).getUser().getScreenName());
                             break;
                         default:
-                            if(ubicacion == Sitios.TIMELINE || ubicacion == Sitios.PROFILE_TWEETS)
+                            if(ubicacion == Sitios.TIMELINE || ubicacion == Sitios.PROFILE_TWEETS || ubicacion == Sitios.MENTIONS)
                                 twitter.reply(timeline.get(i).getId(), reply, timeline.get(i).getUser().getScreenName());
                             else
                                 mainActivity.speak("Comando no disponible.");
@@ -257,7 +266,7 @@ public class AppMain {
                         twitter.moreInformation(trends.get(j).getId());
                         break;
                     default:
-                        if(ubicacion == Sitios.TIMELINE || ubicacion == Sitios.PROFILE_TWEETS)
+                        if(ubicacion == Sitios.TIMELINE || ubicacion == Sitios.PROFILE_TWEETS || ubicacion == Sitios.MENTIONS)
                             twitter.moreInformation(timeline.get(i).getId());
                         else
                             mainActivity.speak("Comando no disponible.");
@@ -297,7 +306,7 @@ public class AppMain {
                         twitter.profile(userId = trends.get(j).getUser().getId());
                         break;
                     default:
-                        if(ubicacion == Sitios.TIMELINE || ubicacion == Sitios.PROFILE_TWEETS)
+                        if(ubicacion == Sitios.TIMELINE || ubicacion == Sitios.PROFILE_TWEETS || ubicacion == Sitios.MENTIONS)
                             twitter.profile(userId = timeline.get(i).getUser().getId());
                         else
                             mainActivity.speak("Comando no disponible.");
@@ -322,7 +331,7 @@ public class AppMain {
                         twitter.follow(userId);
                         break;
                     default:
-                        if(ubicacion == Sitios.TIMELINE || ubicacion == Sitios.PROFILE_TWEETS)
+                        if(ubicacion == Sitios.TIMELINE || ubicacion == Sitios.PROFILE_TWEETS || ubicacion == Sitios.MENTIONS)
                             twitter.follow(timeline.get(i).getUser().getId());
                         else
                             mainActivity.speak("Comando no disponible.");
@@ -340,7 +349,7 @@ public class AppMain {
                         twitter.unfollow(userId);
                         break;
                     default:
-                        if(ubicacion == Sitios.TIMELINE || ubicacion == Sitios.PROFILE_TWEETS)
+                        if(ubicacion == Sitios.TIMELINE || ubicacion == Sitios.PROFILE_TWEETS || ubicacion == Sitios.MENTIONS)
                             twitter.unfollow(timeline.get(i).getUser().getId());
                         else
                             mainActivity.speak("Comando no disponible.");
@@ -364,7 +373,7 @@ public class AppMain {
                             continue;
                         break;
                     default:
-                        if(ubicacion == Sitios.TIMELINE || ubicacion == Sitios.PROFILE_TWEETS) {
+                        if(ubicacion == Sitios.TIMELINE || ubicacion == Sitios.PROFILE_TWEETS || ubicacion == Sitios.MENTIONS) {
                             if ((timeline = twitter.userTimeLine(timeline.get(i).getUser().getId())) == null)
                                 continue;
                         }else {
