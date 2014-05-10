@@ -14,6 +14,7 @@ package ve.edu.ucab.voxtuiter.app;
 import java.util.ArrayList;
 import java.util.List;
 
+import twitter4j.DirectMessage;
 import twitter4j.QueryResult;
 import twitter4j.ResponseList;
 import twitter4j.Status;
@@ -21,7 +22,8 @@ import twitter4j.Trend;
 import twitter4j.User;
 
 enum Sitios {
-    MENU, TIMELINE, TRENDSTITLES, TRENDS, MY_PROFILE, PROFILE, PROFILE_TWEETS, MENTIONS, SEARCH
+    MENU, TIMELINE, TRENDSTITLES, TRENDS, MY_PROFILE, PROFILE,
+    PROFILE_TWEETS, MENTIONS, SEARCH, MESSAGES, SENT_MESSAGES
 }
 
 /**
@@ -56,6 +58,7 @@ public class AppMain {
         Trend[] trendsTitles = null;
         ArrayList<String> matches = null;
         ResponseList<User> users = null;
+        ResponseList<DirectMessage> directMessages = null, sentDirectMessages = null;
         boolean flagRepeat = false;
         boolean flagEnd = false;
         String command = "";
@@ -91,6 +94,14 @@ public class AppMain {
                         break;
                     case SEARCH:
                         mainActivity.speak("Nombre: " + users.get(i).getName() + ". @" + users.get(i).getScreenName());
+                        break;
+                    case MESSAGES:
+                        mainActivity.speak(directMessages.get(i).getSender().getName() + " escribió: " + directMessages.get(i).getText());
+                        mainActivity.speak(" Este mensaje fue escrito el: " + directMessages.get(i).getCreatedAt());
+                        break;
+                    case SENT_MESSAGES:
+                        mainActivity.speak("Mensaje enviado a " + sentDirectMessages.get(i).getRecipient().getName() + ". El mensaje dice: " + sentDirectMessages.get(i).getText());
+                        mainActivity.speak(" Este mensaje fue escrito el: " + sentDirectMessages.get(i).getCreatedAt());
                         break;
                     default:
                         if (ubicacion == Sitios.TIMELINE || ubicacion == Sitios.PROFILE_TWEETS || ubicacion == Sitios.MENTIONS)
@@ -130,6 +141,7 @@ public class AppMain {
 
             if(command.equals("menciones")) {
                 ubicacion = Sitios.MENTIONS;
+                i = 0;
                 if((timeline = twitter.getMentions()) != null) {
                     flagEnd = false;
                     mainActivity.speak(timeline.get(i).getUser().getName() + " dijo, " + timeline.get(i).getText());
@@ -138,6 +150,41 @@ public class AppMain {
             }
 
             if(command.equals("mensajes")){
+                ubicacion = Sitios.MESSAGES;
+                i = 0;
+                if((directMessages = twitter.getDirectMessages()) != null) {
+                    flagEnd = false;
+                    mainActivity.speak(directMessages.get(i).getSender().getName() + " escribió: " + directMessages.get(i).getText());
+                    mainActivity.speak(" Este mensaje fue escrito el: " + directMessages.get(i).getCreatedAt());
+                }
+                continue;
+            }
+
+            if(command.equals("mensajes enviados")){
+                ubicacion = Sitios.SENT_MESSAGES;
+                i = 0;
+                if((sentDirectMessages = twitter.getSentDirectMessages()) != null) {
+                    flagEnd = false;
+                    mainActivity.speak("Mensaje enviado a " + sentDirectMessages.get(i).getRecipient().getName() + ". El mensaje dice: " + sentDirectMessages.get(i).getText());
+                    mainActivity.speak(" Este mensaje fue escrito el: " + sentDirectMessages.get(i).getCreatedAt());
+                }
+                continue;
+            }
+
+            if(command.equals("mensaje nuevo")){
+                if(ubicacion == Sitios.MESSAGES){
+                    String recipientUser, text;
+                    mainActivity.speak("¿A quién desea enviar el mensaje?");
+                    if(!(recipientUser = mainActivity.listenSpeech(15000).get(0)).equals("cancelar")) {
+                        mainActivity.speak("Diga su mensaje:");
+                        if (!(text = mainActivity.listenSpeech(15000).get(0)).equals("cancelar"))
+                            twitter.sendDirectMessage(recipientUser, text);
+                        else
+                            mainActivity.speak("El mensaje directo se ha cancelado.");
+                    }else
+                        mainActivity.speak("El mensaje directo se ha cancelado.");
+                    continue;
+                }
                 continue;
             }
 
@@ -167,6 +214,24 @@ public class AppMain {
                             flagRepeat = true;
                         } else {
                             mainActivity.speak("Usted está en el último usuario encontrado en su búsqueda.");
+                            flagEnd = true;
+                        }
+                        break;
+                    case MESSAGES:
+                        if (directMessages.size() > (i + 1)) {
+                            i++;
+                            flagRepeat = true;
+                        } else {
+                            mainActivity.speak("Usted está en el último mensaje directo recibido que se ha cargado.");
+                            flagEnd = true;
+                        }
+                        break;
+                    case SENT_MESSAGES:
+                        if (sentDirectMessages.size() > (i + 1)) {
+                            i++;
+                            flagRepeat = true;
+                        } else {
+                            mainActivity.speak("Usted está en el último mensaje directo enviado que se ha cargado.");
                             flagEnd = true;
                         }
                         break;
@@ -208,6 +273,20 @@ public class AppMain {
                             flagRepeat = true;
                         }else
                             mainActivity.speak("Usted está en el primer usuario encontrado en su búsqueda.");
+                        break;
+                    case MESSAGES:
+                        if(i > 0){
+                            i--;
+                            flagRepeat = true;
+                        }else
+                            mainActivity.speak("Usted está en el mensaje directo recibido más reciente.");
+                        break;
+                    case SENT_MESSAGES:
+                        if(i > 0){
+                            i--;
+                            flagRepeat = true;
+                        }else
+                            mainActivity.speak("Usted está en el mensaje directo enviado más reciente.");
                         break;
                     default:
                         if(ubicacion == Sitios.TIMELINE || ubicacion == Sitios.PROFILE_TWEETS || ubicacion == Sitios.MENTIONS)
@@ -272,6 +351,9 @@ public class AppMain {
                     switch (ubicacion){
                         case TRENDS:
                             twitter.reply(trends.get(j).getId(), reply, trends.get(j).getUser().getScreenName());
+                            break;
+                        case MESSAGES:
+                            twitter.sendDirectMessage(directMessages.get(i).getSenderId(), reply);
                             break;
                         default:
                             if(ubicacion == Sitios.TIMELINE || ubicacion == Sitios.PROFILE_TWEETS || ubicacion == Sitios.MENTIONS)
@@ -348,6 +430,9 @@ public class AppMain {
                     case SEARCH:
                         twitter.profile(userId = users.get(i).getId());
                         break;
+                    case MESSAGES:
+                        twitter.profile(userId = directMessages.get(i).getSenderId());
+                        break;
                     default:
                         if(ubicacion == Sitios.TIMELINE || ubicacion == Sitios.PROFILE_TWEETS || ubicacion == Sitios.MENTIONS)
                             twitter.profile(userId = timeline.get(i).getUser().getId());
@@ -423,6 +508,10 @@ public class AppMain {
                         break;
                     case SEARCH:
                         if((timeline = twitter.userTimeLine(users.get(i).getId())) == null)
+                            continue;
+                        break;
+                    case MESSAGES:
+                        if((timeline = twitter.userTimeLine(directMessages.get(i).getSenderId())) == null)
                             continue;
                         break;
                     default:

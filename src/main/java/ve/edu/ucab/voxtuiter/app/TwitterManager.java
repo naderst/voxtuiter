@@ -284,12 +284,51 @@ public class TwitterManager {
     }
 
     public ResponseList<DirectMessage> getDirectMessages(){
+        ResponseList<DirectMessage> directMessages;
         try {
-            return twitter.getDirectMessages();
+            if((directMessages = twitter.getDirectMessages()).size() == 0) {
+                mainActivity.speak("No tiene mensajes directos recibidos.");
+                return null;
+            }else
+                return directMessages;
         } catch (TwitterException e) {
-            mainActivity.speak("No se pudieron obtener sus notificaciones.");
+            mainActivity.speak("No se pudieron obtener sus mensajes directos recibidos.");
         }
         return null;
+    }
+
+    public ResponseList<DirectMessage> getSentDirectMessages(){
+        ResponseList<DirectMessage> sentDirectMessages;
+        try {
+            if((sentDirectMessages = twitter.getSentDirectMessages()).size() == 0) {
+                mainActivity.speak("No tiene mensajes directos enviados.");
+                return null;
+            }else
+                return sentDirectMessages;
+        } catch (TwitterException e) {
+            mainActivity.speak("No se pudieron obtener sus mensajes directos enviados.");
+        }
+        return null;
+    }
+
+    public void sendDirectMessage(long userRecipientId, String reply){
+        String userName = new String(" a: ");
+        try {
+            userName = userName + twitter.showUser(userRecipientId).getName();
+            twitter.sendDirectMessage(userRecipientId, reply);
+            mainActivity.speak("Su mensaje directo a sido enviado con éxito" + userName);
+        } catch (TwitterException e) {
+            mainActivity.speak("No se pudo enviar su mensaje directo" + ((!userName.equals(" a: "))? userName : "."));
+        }
+    }
+
+    public void sendDirectMessage(String userName, String reply){
+        try {
+            twitter.sendDirectMessage(userName, reply);
+            mainActivity.speak("Su mensaje directo a sido enviado con éxito a: @" + userName);
+        } catch (TwitterException e) {
+            mainActivity.speak("No se pudo enviar su mensaje directo a: @" + userName);
+        }
     }
 
     /**
