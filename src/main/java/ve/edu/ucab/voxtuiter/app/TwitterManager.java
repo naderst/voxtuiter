@@ -11,6 +11,7 @@
  */
 package ve.edu.ucab.voxtuiter.app;
 
+import twitter4j.DirectMessage;
 import twitter4j.QueryResult;
 import twitter4j.Relationship;
 import twitter4j.ResponseList;
@@ -282,6 +283,15 @@ public class TwitterManager {
         return null;
     }
 
+    public ResponseList<DirectMessage> getDirectMessages(){
+        try {
+            return twitter.getDirectMessages();
+        } catch (TwitterException e) {
+            mainActivity.speak("No se pudieron obtener sus notificaciones.");
+        }
+        return null;
+    }
+
     /**
      * Obtiene el TimeLine principal de la cuenta de Twitter del usuario
      * @return Lista con los tweets del timeline o null en caso de error
@@ -305,6 +315,15 @@ public class TwitterManager {
             return twitter.getPlaceTrends(23424982).getTrends();
         } catch (TwitterException e) {
             mainActivity.speak("No se pudieron obtener de twitter las 10 tendencias de Venezuela.");
+        }
+        return null;
+    }
+
+    public ResponseList<User> search(String text){
+        try {
+            return twitter.searchUsers(text, 1);
+        } catch (TwitterException e){
+            mainActivity.speak("No se pudieron obtener los resultados de su búsqueda");
         }
         return null;
     }

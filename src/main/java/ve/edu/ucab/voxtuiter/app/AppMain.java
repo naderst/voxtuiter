@@ -18,9 +18,10 @@ import twitter4j.QueryResult;
 import twitter4j.ResponseList;
 import twitter4j.Status;
 import twitter4j.Trend;
+import twitter4j.User;
 
 enum Sitios {
-    MENU, TIMELINE, TRENDSTITLES, TRENDS, MY_PROFILE, PROFILE, PROFILE_TWEETS, MENTIONS
+    MENU, TIMELINE, TRENDSTITLES, TRENDS, MY_PROFILE, PROFILE, PROFILE_TWEETS, MENTIONS, SEARCH
 }
 
 /**
@@ -54,6 +55,7 @@ public class AppMain {
         List<Status> trends = null;
         Trend[] trendsTitles = null;
         ArrayList<String> matches = null;
+        ResponseList<User> users = null;
         boolean flagRepeat = false;
         boolean flagEnd = false;
         String command = "";
@@ -86,6 +88,9 @@ public class AppMain {
                         break;
                     case PROFILE:
                         twitter.profile(userId);
+                        break;
+                    case SEARCH:
+                        mainActivity.speak("Nombre: " + users.get(i).getName() + ". @" + users.get(i).getScreenName());
                         break;
                     default:
                         if (ubicacion == Sitios.TIMELINE || ubicacion == Sitios.PROFILE_TWEETS || ubicacion == Sitios.MENTIONS)
@@ -132,6 +137,10 @@ public class AppMain {
                 continue;
             }
 
+            if(command.equals("mensajes")){
+                continue;
+            }
+
             if(command.equals("siguiente")){
                 switch (ubicacion) {
                     case TRENDSTITLES:
@@ -149,6 +158,15 @@ public class AppMain {
                             flagRepeat = true;
                         } else{
                             mainActivity.speak("Usted está en el último tweet cargado de la tendencia actual.");
+                            flagEnd = true;
+                        }
+                        break;
+                    case SEARCH:
+                        if (users.size() > (i + 1)) {
+                            i++;
+                            flagRepeat = true;
+                        } else {
+                            mainActivity.speak("Usted está en el último usuario encontrado en su búsqueda.");
                             flagEnd = true;
                         }
                         break;
@@ -183,6 +201,13 @@ public class AppMain {
                             flagRepeat = true;
                         }else
                             mainActivity.speak("Usted está en el tweet cargado más reciente de la tendencia actual.");
+                        break;
+                    case SEARCH:
+                        if(i > 0){
+                            i--;
+                            flagRepeat = true;
+                        }else
+                            mainActivity.speak("Usted está en el primer usuario encontrado en su búsqueda.");
                         break;
                     default:
                         if(ubicacion == Sitios.TIMELINE || ubicacion == Sitios.PROFILE_TWEETS || ubicacion == Sitios.MENTIONS)
@@ -300,10 +325,28 @@ public class AppMain {
                 continue;
             }
 
+            if(command.equals("buscar")) {
+                ubicacion = Sitios.SEARCH;
+                String text;
+                i = 0;
+                mainActivity.speak("Indique la búsqueda:");
+                if(!(text = mainActivity.listenSpeech(15000).get(0)).equals("cancelar")) {
+                    if((users = twitter.search(text)) != null) {
+                        flagEnd = false;
+                        mainActivity.speak("Nombre: " + users.get(i).getName() + ". @" + users.get(i).getScreenName());
+                    }
+                }else
+                    mainActivity.speak("La búsqueda se ha cancelado.");
+                continue;
+            }
+
             if(command.equals("perfil")) {
                 switch (ubicacion){
                     case TRENDS:
                         twitter.profile(userId = trends.get(j).getUser().getId());
+                        break;
+                    case SEARCH:
+                        twitter.profile(userId = users.get(i).getId());
                         break;
                     default:
                         if(ubicacion == Sitios.TIMELINE || ubicacion == Sitios.PROFILE_TWEETS || ubicacion == Sitios.MENTIONS)
@@ -330,6 +373,9 @@ public class AppMain {
                     case PROFILE:
                         twitter.follow(userId);
                         break;
+                    case SEARCH:
+                        twitter.follow(users.get(i).getId());
+                        break;
                     default:
                         if(ubicacion == Sitios.TIMELINE || ubicacion == Sitios.PROFILE_TWEETS || ubicacion == Sitios.MENTIONS)
                             twitter.follow(timeline.get(i).getUser().getId());
@@ -347,6 +393,9 @@ public class AppMain {
                         break;
                     case PROFILE:
                         twitter.unfollow(userId);
+                        break;
+                    case SEARCH:
+                        twitter.unfollow(users.get(i).getId());
                         break;
                     default:
                         if(ubicacion == Sitios.TIMELINE || ubicacion == Sitios.PROFILE_TWEETS || ubicacion == Sitios.MENTIONS)
@@ -370,6 +419,10 @@ public class AppMain {
                         break;
                     case MY_PROFILE:
                         if((timeline = twitter.myTimeLine()) == null)
+                            continue;
+                        break;
+                    case SEARCH:
+                        if((timeline = twitter.userTimeLine(users.get(i).getId())) == null)
                             continue;
                         break;
                     default:
