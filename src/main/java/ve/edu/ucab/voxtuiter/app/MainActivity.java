@@ -43,6 +43,10 @@ public class MainActivity extends ActionBarActivity implements TextToSpeech.OnIn
      */
     private ArrayList<String> matches;
 
+    private final Object lock = new Object();
+
+    private boolean background = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -58,6 +62,17 @@ public class MainActivity extends ActionBarActivity implements TextToSpeech.OnIn
      */
     public ArrayList<String> listenSpeech(long timer) {
         while(true) {
+            // Se verifica si la App se encuentra en segundo plano
+            synchronized (lock) {
+                if(background) {
+                    try {
+                        lock.wait();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
             startActivityForResult(intent, REQUEST_CODE);
 
             synchronized (matches) {
@@ -67,6 +82,11 @@ public class MainActivity extends ActionBarActivity implements TextToSpeech.OnIn
                     matches.wait(timer); // El hilo se bloquea hasta que el usuario termine de hablar
                 } catch (InterruptedException e) {
                     e.printStackTrace();
+                }
+
+                synchronized (lock) {
+                    if(background)
+                        continue;
                 }
 
                 if(matches.isEmpty()) {
@@ -190,4 +210,28 @@ public class MainActivity extends ActionBarActivity implements TextToSpeech.OnIn
         return settings.getString(key, "");
     }
 
+    /**
+     * Cuando la app se va a segundo plano cambia la variable background a true
+     */
+    @Override
+    public void onStop() {
+        synchronized (lock) {
+            background = true;
+        }
+        super.onStop();
+    }
+
+    /**
+     * Cuando la app inicia o se maximiza luego de haber estado en segundo plano, se cambia la
+     * variable background a false y se desbloquea el hilo que espera para que la app esté en
+     * primer plano
+     */
+    @Override
+    public void onStart() {
+        synchronized (lock) {
+            background = false;
+            lock.notify();
+        }
+        super.onStart();
+    }
 }
