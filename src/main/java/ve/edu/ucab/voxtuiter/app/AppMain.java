@@ -664,7 +664,8 @@ public class AppMain {
                         else if (ubicacion == Sitios.PROFILE_TWEETS) {
                             mainActivity.speak("Leer, tendencias, menciones, mensajes, mensajes enviados, buscar, mi perfil, twittear, salir, cerrar sesión," +
                                     "repetir, siguiente, anterior, retweet, responder, favorito, quitar de favoritos, seguir, no seguir y más información.");
-                        }
+                        }else
+                            mainActivity.speak("Leer, tendencias, menciones, mensajes, mensajes enviados, buscar, mi perfil, twittear, salir, cerrar sesión.");
                         break;
                 }
                         mainActivity.speak("Un placer servirle de ayuda.");
