@@ -99,6 +99,9 @@ public class AppMain {
                     case PROFILE:
                         twitter.profile(userId);
                         break;
+                    case MY_PROFILE:
+                        twitter.myProfile();
+                        break;
                     case SEARCH:
                         mainActivity.speak("Nombre: " + users.get(i).getName() + ". @" + users.get(i).getScreenName());
                         break;
@@ -119,7 +122,7 @@ public class AppMain {
                         }
                         break;
                 }
-                if (ubicacion != Sitios.PROFILE)
+                if (ubicacion != Sitios.PROFILE || ubicacion != Sitios.MY_PROFILE)
                     flagRepeat = false;
                 continue;
             }
@@ -616,6 +619,56 @@ public class AppMain {
             if (command.equals("salir")) {
                 mainActivity.speak("Gracias por su visita, vuelva pronto");
                 System.exit(0);
+            }
+
+            /*
+            Comando de voz para solicitar ayuda de los comandos disponibles actualmente
+            */
+            if (command.equals("ayuda")) {
+                mainActivity.speak("Actualmente puede indicar los siguientes comandos disponibles:");
+                switch (ubicacion) {
+                    case TRENDSTITLES:
+                        mainActivity.speak("Leer, tendencias, menciones, mensajes, mensajes enviados, buscar, mi perfil, twittear, salir, cerrar sesión," +
+                                           "repetir, entrar, siguiente y anterior.");
+                        break;
+                    case TRENDS:
+                        mainActivity.speak("Leer, tendencias, menciones, mensajes, mensajes enviados, buscar, mi perfil, twittear, salir, cerrar sesión," +
+                                           "repetir, siguiente, anterior, retweet, responder, favorito, quitar de favoritos, perfil," +
+                                           "historial de mensajes, seguir, no seguir y más información.");
+                        break;
+                    case PROFILE:
+                        mainActivity.speak("Leer, tendencias, menciones, mensajes, mensajes enviados, buscar, mi perfil, twittear, salir, cerrar sesión," +
+                                "repetir, historial de mensajes, seguir y no seguir.");
+                        break;
+                    case MY_PROFILE:
+                        mainActivity.speak("Leer, tendencias, menciones, mensajes, mensajes enviados, buscar, mi perfil, twittear, salir, cerrar sesión," +
+                                "repetir e historial de mensajes");
+                        break;
+                    case SEARCH:
+                        mainActivity.speak("Leer, tendencias, menciones, mensajes, mensajes enviados, buscar, mi perfil, twittear, salir, cerrar sesión," +
+                                "repetir, siguiente, anterior, perfil, historial de mensajes, seguir y no seguir.");
+                        break;
+                    case MESSAGES:
+                        mainActivity.speak("Leer, tendencias, menciones, mensajes, mensajes enviados, buscar, mi perfil, twittear, salir, cerrar sesión," +
+                                "repetir, siguiente, anterior, perfil, historial de mensajes, responder y mensaje nuevo.");
+                        break;
+                    case SENT_MESSAGES:
+                        mainActivity.speak("Leer, tendencias, menciones, mensajes, mensajes enviados, buscar, mi perfil, twittear, salir, cerrar sesión," +
+                                "repetir, siguiente y anterior.");
+                        break;
+                    default:
+                        if (ubicacion == Sitios.TIMELINE || ubicacion == Sitios.MENTIONS)
+                            mainActivity.speak("Leer, tendencias, menciones, mensajes, mensajes enviados, buscar, mi perfil, twittear, salir, cerrar sesión," +
+                                    "repetir, siguiente, anterior, retweet, responder, favorito, quitar de favoritos, perfil," +
+                                    "historial de mensajes, seguir, no seguir y más información.");
+                        else if (ubicacion == Sitios.PROFILE_TWEETS) {
+                            mainActivity.speak("Leer, tendencias, menciones, mensajes, mensajes enviados, buscar, mi perfil, twittear, salir, cerrar sesión," +
+                                    "repetir, siguiente, anterior, retweet, responder, favorito, quitar de favoritos, seguir, no seguir y más información.");
+                        }
+                        break;
+                }
+                        mainActivity.speak("Un placer servirle de ayuda.");
+                continue;
             }
 
             /*
