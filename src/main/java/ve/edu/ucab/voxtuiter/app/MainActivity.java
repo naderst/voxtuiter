@@ -57,7 +57,7 @@ public class MainActivity extends ActionBarActivity implements TextToSpeech.OnIn
      * @return Lista de frases escuchadas
      */
     public ArrayList<String> listenSpeech(long timer) {
-        while(true) {
+        while (true) {
             startActivityForResult(intent, REQUEST_CODE);
 
             synchronized (matches) {
@@ -69,9 +69,9 @@ public class MainActivity extends ActionBarActivity implements TextToSpeech.OnIn
                     e.printStackTrace();
                 }
 
-                if(matches.isEmpty()) {
+                if (matches.isEmpty()) {
                     /* Ha pasado mucho tiempo y el usuario no ha dicho nada? */
-                    if(timer > 5000)
+                    if (timer > 5000)
                         speak("Lo siento, no escuché lo que dijo, vuelva a intentarlo");
                     else
                         return null;
@@ -108,6 +108,7 @@ public class MainActivity extends ActionBarActivity implements TextToSpeech.OnIn
 
     /**
      * Abre una url en el navegador de Android
+     *
      * @param url URL a mostrar en el navegador
      */
     public void openURL(String url) {

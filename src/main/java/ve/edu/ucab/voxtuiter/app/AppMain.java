@@ -51,7 +51,7 @@ public class AppMain {
     /**
      * Evento que se ejecuta cuando la aplicación está lista para empezar
      */
-    public void onInit(){
+    public void onInit() {
         ubicacion = Sitios.MENU;
         ResponseList<Status> timeline = null;
         List<Status> trends = null;
@@ -65,23 +65,30 @@ public class AppMain {
         int i = 0, j = 0;
         long userId = 0;
 
-        while(true) {
-            if(!flagRepeat){
-                if((ubicacion == Sitios.TIMELINE || ubicacion == Sitios.PROFILE_TWEETS || ubicacion == Sitios.TRENDSTITLES || ubicacion == Sitios.TRENDS) && !flagEnd) {
-                    if((matches = mainActivity.listenSpeech(5000)) != null)
+        /*
+        Ciclo infinito que lleva el control de todos los comandos de la aplicación que indica
+        el usuario y administra el flujo de datos de toda la aplicación
+        */
+        while (true) {
+            if (!flagRepeat) {
+                if ((ubicacion == Sitios.TIMELINE || ubicacion == Sitios.PROFILE_TWEETS || ubicacion == Sitios.TRENDSTITLES || ubicacion == Sitios.TRENDS) && !flagEnd) {
+                    if ((matches = mainActivity.listenSpeech(5000)) != null)
                         command = matches.get(0);
                     else
                         command = "siguiente";
-                }else {
+                } else {
                     mainActivity.speak("Diga un comando");
                     matches = mainActivity.listenSpeech(15000);
                     command = matches.get(0);
                 }
-            }else
-                if(flagRepeat)
-                    command = "repetir";
+            } else if (flagRepeat)
+                command = "repetir";
 
-            if(command.equals("repetir")){
+            /*
+            Comando de voz para repetir el último  mensaje directo, tweet, trending topic,
+            meción o resultado de búsqueda
+            */
+            if (command.equals("repetir")) {
                 switch (ubicacion) {
                     case TRENDSTITLES:
                         mainActivity.speak("La tendencia número" + (i + 1) + "es la siguiente:" + trendsTitles[i].getName());
@@ -106,53 +113,68 @@ public class AppMain {
                     default:
                         if (ubicacion == Sitios.TIMELINE || ubicacion == Sitios.PROFILE_TWEETS || ubicacion == Sitios.MENTIONS)
                             mainActivity.speak(timeline.get(i).getUser().getName() + " dijo, " + timeline.get(i).getText());
-                        else{
+                        else {
                             mainActivity.speak("Comando no disponible.");
                             continue;
                         }
                         break;
                 }
-                if(ubicacion != Sitios.PROFILE)
+                if (ubicacion != Sitios.PROFILE)
                     flagRepeat = false;
                 continue;
             }
 
-            if(command.equals("leer")) {
+            /*
+            Comando de voz para que lea el timeline del usuario
+            cuya sesión esta iniciada en la aplicación
+            */
+            if (command.equals("leer")) {
                 ubicacion = Sitios.TIMELINE;
                 i = 0;
-                if((timeline = twitter.getTimeLine()) != null) {
+                if ((timeline = twitter.getTimeLine()) != null) {
                     flagEnd = false;
                     mainActivity.speak(timeline.get(i).getUser().getName() + " dijo, " + timeline.get(i).getText());
                 }
                 continue;
             }
 
-            if(command.equals("tendencias")) {
-                if(ubicacion != Sitios.TRENDS)
+            /*
+            Comando de voz para obtener los top 10 trending topics de Venezuela
+            */
+            if (command.equals("tendencias")) {
+                if (ubicacion != Sitios.TRENDS)
                     i = 0;
 
                 ubicacion = Sitios.TRENDSTITLES;
-                if((trendsTitles = twitter.getTrendsTitles()) != null) {
+                if ((trendsTitles = twitter.getTrendsTitles()) != null) {
                     flagEnd = false;
                     mainActivity.speak("La tendencia número" + (i + 1) + "es la siguiente:" + trendsTitles[i].getName());
                 }
                 continue;
             }
 
-            if(command.equals("menciones")) {
+            /*
+            Comando de voz para obtener las menciones más recientes
+            del usuario cuya sesión está iniciada
+            */
+            if (command.equals("menciones")) {
                 ubicacion = Sitios.MENTIONS;
                 i = 0;
-                if((timeline = twitter.getMentions()) != null) {
+                if ((timeline = twitter.getMentions()) != null) {
                     flagEnd = false;
                     mainActivity.speak(timeline.get(i).getUser().getName() + " dijo, " + timeline.get(i).getText());
                 }
                 continue;
             }
 
-            if(command.equals("mensajes")){
+            /*
+            Comando de voz para obtener los mensajes directos recibidos más recientes
+            del usuario cuya sesión está iniciada
+            */
+            if (command.equals("mensajes")) {
                 ubicacion = Sitios.MESSAGES;
                 i = 0;
-                if((directMessages = twitter.getDirectMessages()) != null) {
+                if ((directMessages = twitter.getDirectMessages()) != null) {
                     flagEnd = false;
                     mainActivity.speak(directMessages.get(i).getSender().getName() + " escribió: " + directMessages.get(i).getText());
                     mainActivity.speak(" Este mensaje fue escrito el: " + directMessages.get(i).getCreatedAt());
@@ -160,10 +182,14 @@ public class AppMain {
                 continue;
             }
 
-            if(command.equals("mensajes enviados")){
+            /*
+            Comando de voz para obtener los mensajes directos enviados más recientes
+            del usuario cuya sesión está iniciada
+            */
+            if (command.equals("mensajes enviados")) {
                 ubicacion = Sitios.SENT_MESSAGES;
                 i = 0;
-                if((sentDirectMessages = twitter.getSentDirectMessages()) != null) {
+                if ((sentDirectMessages = twitter.getSentDirectMessages()) != null) {
                     flagEnd = false;
                     mainActivity.speak("Mensaje enviado a " + sentDirectMessages.get(i).getRecipient().getName() + ". El mensaje dice: " + sentDirectMessages.get(i).getText());
                     mainActivity.speak(" Este mensaje fue escrito el: " + sentDirectMessages.get(i).getCreatedAt());
@@ -171,24 +197,31 @@ public class AppMain {
                 continue;
             }
 
-            if(command.equals("mensaje nuevo")){
-                if(ubicacion == Sitios.MESSAGES){
+            /*
+            Comando de voz para enviar un nuevo mensaje directo a un usuario indicado
+            */
+            if (command.equals("mensaje nuevo")) {
+                if (ubicacion == Sitios.MESSAGES) {
                     String recipientUser, text;
                     mainActivity.speak("¿A quién desea enviar el mensaje?");
-                    if(!(recipientUser = mainActivity.listenSpeech(15000).get(0)).equals("cancelar")) {
+                    if (!(recipientUser = mainActivity.listenSpeech(15000).get(0)).equals("cancelar")) {
                         mainActivity.speak("Diga su mensaje:");
                         if (!(text = mainActivity.listenSpeech(15000).get(0)).equals("cancelar"))
                             twitter.sendDirectMessage(recipientUser, text);
                         else
                             mainActivity.speak("El mensaje directo se ha cancelado.");
-                    }else
+                    } else
                         mainActivity.speak("El mensaje directo se ha cancelado.");
                     continue;
                 }
                 continue;
             }
 
-            if(command.equals("siguiente")){
+            /*
+            Comando de voz para pasar al mensaje directo, tweet, trending topic,
+            meción o resultado de búsqueda siguiente
+            */
+            if (command.equals("siguiente")) {
                 switch (ubicacion) {
                     case TRENDSTITLES:
                         if (trendsTitles.length > (i + 1)) {
@@ -203,7 +236,7 @@ public class AppMain {
                         if (trends.size() > (j + 1)) {
                             j++;
                             flagRepeat = true;
-                        } else{
+                        } else {
                             mainActivity.speak("Usted está en el último tweet cargado de la tendencia actual.");
                             flagEnd = true;
                         }
@@ -236,11 +269,11 @@ public class AppMain {
                         }
                         break;
                     default:
-                        if(ubicacion == Sitios.TIMELINE || ubicacion == Sitios.PROFILE_TWEETS || ubicacion == Sitios.MENTIONS)
-                            if(timeline.size() > (i + 1)){
+                        if (ubicacion == Sitios.TIMELINE || ubicacion == Sitios.PROFILE_TWEETS || ubicacion == Sitios.MENTIONS)
+                            if (timeline.size() > (i + 1)) {
                                 i++;
                                 flagRepeat = true;
-                            }else {
+                            } else {
                                 mainActivity.speak("Usted está en el último tweet cargado.");
                                 flagEnd = true;
                             }
@@ -251,49 +284,53 @@ public class AppMain {
                 continue;
             }
 
-            if(command.equals("anterior")){
-                switch (ubicacion){
+            /*
+            Comando de voz para regresar a un mensaje directo, tweet, trending topic,
+            meción o resultado de búsqueda anterior
+            */
+            if (command.equals("anterior")) {
+                switch (ubicacion) {
                     case TRENDSTITLES:
-                        if(i > 0){
+                        if (i > 0) {
                             i--;
                             flagRepeat = true;
-                        }else
+                        } else
                             mainActivity.speak("Usted está en la tendencia cargada más reciente.");
                         break;
                     case TRENDS:
-                        if(j > 0){
+                        if (j > 0) {
                             j--;
                             flagRepeat = true;
-                        }else
+                        } else
                             mainActivity.speak("Usted está en el tweet cargado más reciente de la tendencia actual.");
                         break;
                     case SEARCH:
-                        if(i > 0){
+                        if (i > 0) {
                             i--;
                             flagRepeat = true;
-                        }else
+                        } else
                             mainActivity.speak("Usted está en el primer usuario encontrado en su búsqueda.");
                         break;
                     case MESSAGES:
-                        if(i > 0){
+                        if (i > 0) {
                             i--;
                             flagRepeat = true;
-                        }else
+                        } else
                             mainActivity.speak("Usted está en el mensaje directo recibido más reciente.");
                         break;
                     case SENT_MESSAGES:
-                        if(i > 0){
+                        if (i > 0) {
                             i--;
                             flagRepeat = true;
-                        }else
+                        } else
                             mainActivity.speak("Usted está en el mensaje directo enviado más reciente.");
                         break;
                     default:
-                        if(ubicacion == Sitios.TIMELINE || ubicacion == Sitios.PROFILE_TWEETS || ubicacion == Sitios.MENTIONS)
-                            if(i > 0){
+                        if (ubicacion == Sitios.TIMELINE || ubicacion == Sitios.PROFILE_TWEETS || ubicacion == Sitios.MENTIONS)
+                            if (i > 0) {
                                 i--;
                                 flagRepeat = true;
-                            }else
+                            } else
                                 mainActivity.speak("Usted está en el tweet cargado más reciente.");
                         else
                             mainActivity.speak("Comando no disponible.");
@@ -301,13 +338,17 @@ public class AppMain {
                 }
                 continue;
             }
-            if(command.equals("retweet")) {
-                switch (ubicacion){
+
+            /*
+            Comando de voz para hacer un retweet
+            */
+            if (command.equals("retweet")) {
+                switch (ubicacion) {
                     case TRENDS:
                         twitter.retweet(trends.get(j).getId());
                         break;
                     default:
-                        if(ubicacion == Sitios.TIMELINE || ubicacion == Sitios.PROFILE_TWEETS || ubicacion == Sitios.MENTIONS)
+                        if (ubicacion == Sitios.TIMELINE || ubicacion == Sitios.PROFILE_TWEETS || ubicacion == Sitios.MENTIONS)
                             twitter.retweet(timeline.get(i).getId());
                         else
                             mainActivity.speak("Comando no disponible.");
@@ -315,13 +356,17 @@ public class AppMain {
                 }
                 continue;
             }
-            if(command.equals("favorito")) {
-                switch (ubicacion){
+
+            /*
+            Comando de voz para marcar como favorito un tweet indicado
+            */
+            if (command.equals("favorito")) {
+                switch (ubicacion) {
                     case TRENDS:
                         twitter.fav(trends.get(j).getId());
                         break;
                     default:
-                        if(ubicacion == Sitios.TIMELINE || ubicacion == Sitios.PROFILE_TWEETS || ubicacion == Sitios.MENTIONS)
+                        if (ubicacion == Sitios.TIMELINE || ubicacion == Sitios.PROFILE_TWEETS || ubicacion == Sitios.MENTIONS)
                             twitter.fav(timeline.get(i).getId());
                         else
                             mainActivity.speak("Comando no disponible.");
@@ -329,13 +374,17 @@ public class AppMain {
                 }
                 continue;
             }
-            if(command.equals("quitar de favoritos")) {
-                switch (ubicacion){
+
+            /*
+            Comando de voz para quitar un tweet indicado de favoritos
+            */
+            if (command.equals("quitar de favoritos")) {
+                switch (ubicacion) {
                     case TRENDS:
                         twitter.removeFav(trends.get(j).getId());
                         break;
                     default:
-                        if(ubicacion == Sitios.TIMELINE || ubicacion == Sitios.PROFILE_TWEETS || ubicacion == Sitios.MENTIONS)
+                        if (ubicacion == Sitios.TIMELINE || ubicacion == Sitios.PROFILE_TWEETS || ubicacion == Sitios.MENTIONS)
                             twitter.removeFav(timeline.get(i).getId());
                         else
                             mainActivity.speak("Comando no disponible.");
@@ -344,11 +393,14 @@ public class AppMain {
                 continue;
             }
 
-            if(command.equals("responder")) {
+            /*
+            Comando de voz para responder un tweet indicado
+            */
+            if (command.equals("responder")) {
                 mainActivity.speak("Indique su respuesta");
                 String reply;
-                if(!(reply = mainActivity.listenSpeech(15000).get(0)).equals("cancelar"))
-                    switch (ubicacion){
+                if (!(reply = mainActivity.listenSpeech(15000).get(0)).equals("cancelar"))
+                    switch (ubicacion) {
                         case TRENDS:
                             twitter.reply(trends.get(j).getId(), reply, trends.get(j).getUser().getScreenName());
                             break;
@@ -356,7 +408,7 @@ public class AppMain {
                             twitter.sendDirectMessage(directMessages.get(i).getSenderId(), reply);
                             break;
                         default:
-                            if(ubicacion == Sitios.TIMELINE || ubicacion == Sitios.PROFILE_TWEETS || ubicacion == Sitios.MENTIONS)
+                            if (ubicacion == Sitios.TIMELINE || ubicacion == Sitios.PROFILE_TWEETS || ubicacion == Sitios.MENTIONS)
                                 twitter.reply(timeline.get(i).getId(), reply, timeline.get(i).getUser().getScreenName());
                             else
                                 mainActivity.speak("Comando no disponible.");
@@ -367,13 +419,16 @@ public class AppMain {
                 continue;
             }
 
-            if(command.equals("más información")){
-                switch (ubicacion){
+            /*
+            Comando de voz que indica más información acerca de un tweet
+            */
+            if (command.equals("más información")) {
+                switch (ubicacion) {
                     case TRENDS:
                         twitter.moreInformation(trends.get(j).getId());
                         break;
                     default:
-                        if(ubicacion == Sitios.TIMELINE || ubicacion == Sitios.PROFILE_TWEETS || ubicacion == Sitios.MENTIONS)
+                        if (ubicacion == Sitios.TIMELINE || ubicacion == Sitios.PROFILE_TWEETS || ubicacion == Sitios.MENTIONS)
                             twitter.moreInformation(timeline.get(i).getId());
                         else
                             mainActivity.speak("Comando no disponible.");
@@ -382,48 +437,59 @@ public class AppMain {
                 continue;
             }
 
-            if(command.equals("entrar")){
-                if(ubicacion == Sitios.TRENDSTITLES){
+            /*
+            Comando de voz para ingresar al timeline de tweets de una tendencia indicada
+            */
+            if (command.equals("entrar")) {
+                if (ubicacion == Sitios.TRENDSTITLES) {
                     ubicacion = Sitios.TRENDS;
                     QueryResult result;
-                    if((result = twitter.search(trendsTitles[i].getQuery(), trendsTitles[i].getName())) != null) {
+                    if ((result = twitter.trendTweets(trendsTitles[i].getQuery(), trendsTitles[i].getName())) != null) {
                         trends = result.getTweets();
                         j = 0;
                         flagEnd = false;
                         mainActivity.speak(trends.get(j).getUser().getName() + " dijo, " + trends.get(j).getText());
                     }
-                }else
+                } else
                     mainActivity.speak("Comando no disponible.");
                 continue;
             }
 
-            if(command.equals("twittear")) {
+            /*
+            Comando de voz para twittear un mensaje
+            */
+            if (command.equals("twittear")) {
                 String text;
                 mainActivity.speak("Diga su tweet");
-                if(!(text = mainActivity.listenSpeech(15000).get(0)).equals("cancelar"))
+                if (!(text = mainActivity.listenSpeech(15000).get(0)).equals("cancelar"))
                     twitter.tweet(text);
                 else
                     mainActivity.speak("El tweet se ha cancelado.");
                 continue;
             }
 
-            if(command.equals("buscar")) {
+            /*
+            Comando de voz para realizar una búsqueda en twitter
+            */
+            if (command.equals("buscar")) {
                 ubicacion = Sitios.SEARCH;
                 String text;
                 i = 0;
                 mainActivity.speak("Indique la búsqueda:");
-                if(!(text = mainActivity.listenSpeech(15000).get(0)).equals("cancelar")) {
-                    if((users = twitter.search(text)) != null) {
+                if (!(text = mainActivity.listenSpeech(15000).get(0)).equals("cancelar")) {
+                    if ((users = twitter.search(text)) != null) {
                         flagEnd = false;
                         mainActivity.speak("Nombre: " + users.get(i).getName() + ". @" + users.get(i).getScreenName());
                     }
-                }else
+                } else
                     mainActivity.speak("La búsqueda se ha cancelado.");
                 continue;
             }
-
-            if(command.equals("perfil")) {
-                switch (ubicacion){
+            /*
+            Comando de voz para indicar la información del perfil de un usuario indicado
+            */
+            if (command.equals("perfil")) {
+                switch (ubicacion) {
                     case TRENDS:
                         twitter.profile(userId = trends.get(j).getUser().getId());
                         break;
@@ -434,7 +500,7 @@ public class AppMain {
                         twitter.profile(userId = directMessages.get(i).getSenderId());
                         break;
                     default:
-                        if(ubicacion == Sitios.TIMELINE || ubicacion == Sitios.PROFILE_TWEETS || ubicacion == Sitios.MENTIONS)
+                        if (ubicacion == Sitios.TIMELINE || ubicacion == Sitios.PROFILE_TWEETS || ubicacion == Sitios.MENTIONS)
                             twitter.profile(userId = timeline.get(i).getUser().getId());
                         else
                             mainActivity.speak("Comando no disponible.");
@@ -444,14 +510,21 @@ public class AppMain {
                 continue;
             }
 
-            if(command.equals("mi perfil")) {
+            /*
+            Comando de voz para indicar la información de perfil del usuario
+            cuya sesión está iniciada en la aplicación
+            */
+            if (command.equals("mi perfil")) {
                 ubicacion = Sitios.MY_PROFILE;
                 twitter.myProfile();
                 continue;
             }
 
-            if(command.equals("seguir")){
-                switch (ubicacion){
+            /*
+            Comando de voz para solicitar seguir a un usuario indicado
+            */
+            if (command.equals("seguir")) {
+                switch (ubicacion) {
                     case TRENDS:
                         twitter.follow(trends.get(j).getUser().getId());
                         break;
@@ -462,7 +535,7 @@ public class AppMain {
                         twitter.follow(users.get(i).getId());
                         break;
                     default:
-                        if(ubicacion == Sitios.TIMELINE || ubicacion == Sitios.PROFILE_TWEETS || ubicacion == Sitios.MENTIONS)
+                        if (ubicacion == Sitios.TIMELINE || ubicacion == Sitios.PROFILE_TWEETS || ubicacion == Sitios.MENTIONS)
                             twitter.follow(timeline.get(i).getUser().getId());
                         else
                             mainActivity.speak("Comando no disponible.");
@@ -471,8 +544,11 @@ public class AppMain {
                 continue;
             }
 
-            if(command.equals("no seguir")){
-                switch (ubicacion){
+            /*
+            Comando de voz para dejar de seguir a un usuario indicado
+            */
+            if (command.equals("no seguir")) {
+                switch (ubicacion) {
                     case TRENDS:
                         twitter.unfollow(trends.get(j).getUser().getId());
                         break;
@@ -483,7 +559,7 @@ public class AppMain {
                         twitter.unfollow(users.get(i).getId());
                         break;
                     default:
-                        if(ubicacion == Sitios.TIMELINE || ubicacion == Sitios.PROFILE_TWEETS || ubicacion == Sitios.MENTIONS)
+                        if (ubicacion == Sitios.TIMELINE || ubicacion == Sitios.PROFILE_TWEETS || ubicacion == Sitios.MENTIONS)
                             twitter.unfollow(timeline.get(i).getUser().getId());
                         else
                             mainActivity.speak("Comando no disponible.");
@@ -492,33 +568,36 @@ public class AppMain {
                 continue;
             }
 
-            if(command.equals("historial de mensajes")){
-                switch (ubicacion){
+            /*
+            Comando de voz para mostrar los tweets de un usuario indicado
+            */
+            if (command.equals("historial de mensajes")) {
+                switch (ubicacion) {
                     case TRENDS:
-                        if((timeline = twitter.userTimeLine(trends.get(j).getUser().getId())) == null)
+                        if ((timeline = twitter.userTimeLine(trends.get(j).getUser().getId())) == null)
                             continue;
                         break;
                     case PROFILE:
-                        if((timeline = twitter.userTimeLine(userId)) == null)
+                        if ((timeline = twitter.userTimeLine(userId)) == null)
                             continue;
                         break;
                     case MY_PROFILE:
-                        if((timeline = twitter.myTimeLine()) == null)
+                        if ((timeline = twitter.myTimeLine()) == null)
                             continue;
                         break;
                     case SEARCH:
-                        if((timeline = twitter.userTimeLine(users.get(i).getId())) == null)
+                        if ((timeline = twitter.userTimeLine(users.get(i).getId())) == null)
                             continue;
                         break;
                     case MESSAGES:
-                        if((timeline = twitter.userTimeLine(directMessages.get(i).getSenderId())) == null)
+                        if ((timeline = twitter.userTimeLine(directMessages.get(i).getSenderId())) == null)
                             continue;
                         break;
                     default:
-                        if(ubicacion == Sitios.TIMELINE || ubicacion == Sitios.PROFILE_TWEETS || ubicacion == Sitios.MENTIONS) {
+                        if (ubicacion == Sitios.TIMELINE || ubicacion == Sitios.PROFILE_TWEETS || ubicacion == Sitios.MENTIONS) {
                             if ((timeline = twitter.userTimeLine(timeline.get(i).getUser().getId())) == null)
                                 continue;
-                        }else {
+                        } else {
                             mainActivity.speak("Comando no disponible.");
                             continue;
                         }
@@ -531,20 +610,24 @@ public class AppMain {
                 continue;
             }
 
-            if(command.equals("salir")) {
+            /*
+            Comando de voz para salir de la aplicación
+            */
+            if (command.equals("salir")) {
                 mainActivity.speak("Gracias por su visita, vuelva pronto");
                 System.exit(0);
             }
 
-            if(command.equals("cerrar sesión")) {
-                twitter.signOut();
-                mainActivity.speak("Sesión finalizada con éxito. Cerrando aplicación, gracias por visitarnos vuelva pronto");
-                System.exit(0);
+            /*
+            Comando de voz para cerrar la sesión en la aplicación
+            */
+            if (command.equals("cerrar sesión")) {
+                    twitter.signOut();
+                    mainActivity.speak("Sesión finalizada con éxito. Cerrando aplicación, gracias por visitarnos vuelva pronto");
+                    System.exit(0);
+                }
+
+                mainActivity.speak("Comando inválido, vuelva a intentarlo.");
             }
-
-            mainActivity.speak("Comando inválido, vuelva a intentarlo.");
-
-            System.out.println(matches.toString());
-        }
     }
 }

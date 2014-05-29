@@ -48,7 +48,7 @@ public class TwitterManager {
             Verificamos si hay tokens de acceso almacenados, si los hay los utilizamos para
             autenticar...
          */
-        if(!mainActivity.read("accessToken").isEmpty() && !mainActivity.read("accessSecret").isEmpty()) {
+        if (!mainActivity.read("accessToken").isEmpty() && !mainActivity.read("accessSecret").isEmpty()) {
             cb.setOAuthAccessToken(mainActivity.read("accessToken")).setOAuthAccessTokenSecret(mainActivity.read("accessSecret"));
             tf = new TwitterFactory(cb.build());
             twitter = tf.getInstance();
@@ -78,7 +78,7 @@ public class TwitterManager {
                 System.out.println(pin);
                 accessToken = twitter.getOAuthAccessToken(requestToken, pin);
             } catch (TwitterException te) {
-                if(te.getStatusCode() == 401) {
+                if (te.getStatusCode() == 401) {
                     mainActivity.speak("PIN incorrecto.");
                     System.exit(1);
                 } else {
@@ -98,10 +98,10 @@ public class TwitterManager {
      */
     public void tweet(String text) {
         try {
-            if(text.length() <= 140){
+            if (text.length() <= 140) {
                 twitter.updateStatus(text);
                 mainActivity.speak("Tweet publicado con éxito.");
-            }else
+            } else
                 mainActivity.speak("Error, el tweet debe contener máximo 140 caracteres");
         } catch (TwitterException e) {
             mainActivity.speak("No se pudo escribir el tweet indicado.");
@@ -135,6 +135,12 @@ public class TwitterManager {
             mainActivity.speak("No se pudo marcar como favorito el tweet seleccionado.");
         }
     }
+
+    /**
+     * Elimina un tweet de favoritos
+     *
+     * @param tweetId ID del tweet
+     */
     public void removeFav(long tweetId) {
         try {
             twitter.destroyFavorite(tweetId);
@@ -144,7 +150,14 @@ public class TwitterManager {
         }
     }
 
-    public void reply(long tweetId, String reply, String screen_name){
+    /**
+     * Envía una respuesta a un tweet
+     *
+     * @param tweetId     ID del tweet
+     * @param reply       mensaje de respuesta
+     * @param screen_name nombre de usuario dal que se le hace una respuesta
+     */
+    public void reply(long tweetId, String reply, String screen_name) {
         try {
             StatusUpdate update = new StatusUpdate("@" + screen_name + " " + reply);
             update.setInReplyToStatusId(tweetId);
@@ -155,21 +168,26 @@ public class TwitterManager {
         }
     }
 
-    public void moreInformation(long tweetId){
+    /**
+     * Indica más información acerca de un tweet
+     *
+     * @param tweetId ID del tweet
+     */
+    public void moreInformation(long tweetId) {
         try {
             Status tweet = twitter.showStatus(tweetId);
             mainActivity.speak("Este tuit fue creado en el: " + tweet.getCreatedAt().toString());
-            if(tweet.getGeoLocation() != null && !tweet.getGeoLocation().toString().matches(".*\\d+.*"))
+            if (tweet.getGeoLocation() != null && !tweet.getGeoLocation().toString().matches(".*\\d+.*"))
                 mainActivity.speak("Fue publicado desde: " + tweet.getGeoLocation().toString());
-            if(tweet.getPlace() != null && !tweet.getPlace().getFullName().isEmpty())
+            if (tweet.getPlace() != null && !tweet.getPlace().getFullName().isEmpty())
                 mainActivity.speak("Se adjunto la ubicación: " + tweet.getPlace().getFullName() + " en este tweet");
-            if(tweet.getRetweetCount() > 0)
+            if (tweet.getRetweetCount() > 0)
                 mainActivity.speak("Ha sido retuiteado " + tweet.getRetweetCount() + " veces");
             else
                 mainActivity.speak("Todavía no ha sido retuiteado");
-            if(tweet.isRetweetedByMe())
+            if (tweet.isRetweetedByMe())
                 mainActivity.speak("Y usted lo ha retuiteado");
-            if(tweet.getFavoriteCount() > 0)
+            if (tweet.getFavoriteCount() > 0)
                 mainActivity.speak("Ha sido marcado como favorito " + tweet.getFavoriteCount() + " veces");
             else
                 mainActivity.speak("Todavía no ha sido marcado como favorito");
@@ -178,7 +196,12 @@ public class TwitterManager {
         }
     }
 
-    public void profile(long userId){
+    /**
+     * Muestra la información del perfil de un usuario
+     *
+     * @param userId ID del usuario
+     */
+    public void profile(long userId) {
         try {
             User user = twitter.showUser(userId);
             AccessToken accessToken = twitter.getOAuthAccessToken();
@@ -187,19 +210,19 @@ public class TwitterManager {
             String description = user.getDescription();
             String location = user.getLocation();
             mainActivity.speak("Usted está visitando el perfil de: " + user.getName());
-            if(!description.isEmpty())
+            if (!description.isEmpty())
                 mainActivity.speak("La descripción del usuario es: " + description);
-            if(!location.isEmpty() && !location.matches(".*\\d+.*"))
+            if (!location.isEmpty() && !location.matches(".*\\d+.*"))
                 mainActivity.speak("Se ubica en: " + location);
-            if(user.isVerified())
+            if (user.isVerified())
                 mainActivity.speak("Este es un usuario verificado");
-            if(relationship.isSourceFollowingTarget() && twitter.showFriendship(myUserId, userId).isSourceFollowedByTarget())
+            if (relationship.isSourceFollowingTarget() && twitter.showFriendship(myUserId, userId).isSourceFollowedByTarget())
                 mainActivity.speak("Usted sigue a este usuario y él también lo sigue");
-            else if(relationship.isSourceFollowingTarget())
+            else if (relationship.isSourceFollowingTarget())
                 mainActivity.speak("Usted sigue a este usuario pero el no lo sigue");
-            else if(relationship.isSourceFollowedByTarget())
+            else if (relationship.isSourceFollowedByTarget())
                 mainActivity.speak("Este usuario lo sigue pero usted no");
-            else if(relationship.isSourceBlockingTarget())
+            else if (relationship.isSourceBlockingTarget())
                 mainActivity.speak("Usted ha bloqueado a este usuario");
             mainActivity.speak("El usuario ha publicado: " + user.getStatusesCount() + " tweets");
             mainActivity.speak("Ha marcado: " + user.getFavouritesCount() + " tweets como favorito");
@@ -210,18 +233,21 @@ public class TwitterManager {
         }
     }
 
-    public void myProfile(){
+    /**
+     * Indica la información de perfil del usuario con sesión iniciada en la aplicación
+     */
+    public void myProfile() {
         try {
             AccessToken accessToken = twitter.getOAuthAccessToken();
             User user = twitter.showUser(accessToken.getUserId());
             String description = user.getDescription();
             String location = user.getLocation();
             mainActivity.speak("El nombre de su perfil es: " + user.getName());
-            if(!description.isEmpty())
+            if (!description.isEmpty())
                 mainActivity.speak("Su descripción es: " + description);
-            if(!location.isEmpty() && !location.matches(".*\\d+.*"))
+            if (!location.isEmpty() && !location.matches(".*\\d+.*"))
                 mainActivity.speak("Se ubica en: " + location);
-            if(user.isVerified())
+            if (user.isVerified())
                 mainActivity.speak("Usted es un usuario verificado");
             mainActivity.speak("Usted ha publicado: " + user.getStatusesCount() + " tweets");
             mainActivity.speak("Ha marcado: " + user.getFavouritesCount() + " tweets como favorito");
@@ -232,31 +258,47 @@ public class TwitterManager {
         }
     }
 
-    public void follow(long userId){
+    /**
+     * Genera una solicitud de seguimiento a un usuario
+     *
+     * @param userId ID del usuario
+     */
+    public void follow(long userId) {
         try {
-            if(!twitter.showFriendship(twitter.getOAuthAccessToken().getUserId(),userId).isSourceFollowingTarget()){
+            if (!twitter.showFriendship(twitter.getOAuthAccessToken().getUserId(), userId).isSourceFollowingTarget()) {
                 twitter.createFriendship(userId, true);
                 mainActivity.speak("Ahora sigue a este usuario.");
-            }else
+            } else
                 mainActivity.speak("Usted ya sigue a este usuario desde antes.");
         } catch (TwitterException e) {
             mainActivity.speak("No se pudo seguir al usuario indicado.");
         }
     }
 
-    public void unfollow(long userId){
+    /**
+     * Genera una solicitud para dejar de seguir a un usuario
+     *
+     * @param userId ID del usuario
+     */
+    public void unfollow(long userId) {
         try {
-            if(twitter.showFriendship(twitter.getOAuthAccessToken().getUserId(),userId).isSourceFollowingTarget()){
+            if (twitter.showFriendship(twitter.getOAuthAccessToken().getUserId(), userId).isSourceFollowingTarget()) {
                 twitter.destroyFriendship(userId);
                 mainActivity.speak("Ya no sigue a este usuario.");
-            }else
+            } else
                 mainActivity.speak("Usted no sigue a este usuario desde antes.");
         } catch (TwitterException e) {
             mainActivity.speak("No se pudo deshacer el seguimiento al usuario indicado.");
         }
     }
 
-    public ResponseList<Status> userTimeLine(long userId){
+    /**
+     * Obtiene el timeline con los N tweets más recientes de un usuario
+     *
+     * @param userId ID del usuario
+     * @return lista con los N tweets más recientes de un usuario o null en caso de error
+     */
+    public ResponseList<Status> userTimeLine(long userId) {
         try {
             return twitter.getUserTimeline(userId);
         } catch (TwitterException e) {
@@ -265,7 +307,13 @@ public class TwitterManager {
         return null;
     }
 
-    public ResponseList<Status> myTimeLine(){
+    /**
+     * Obtiene el timeline con los N tweets más recientes del usuario cuya sessión
+     * esta iniciada en la aplicación
+     *
+     * @return lista con los N tweets más recientes de un usuario o null en caso de error
+     */
+    public ResponseList<Status> myTimeLine() {
         try {
             return twitter.getUserTimeline(twitter.getOAuthAccessToken().getUserId());
         } catch (TwitterException e) {
@@ -274,7 +322,13 @@ public class TwitterManager {
         return null;
     }
 
-    public ResponseList<Status> getMentions(){
+    /**
+     * Obtiene las N menciones más recientes del usuario cuya sessión
+     * esta iniciada en la aplicación
+     *
+     * @return lista con las N menciones más recientes  o null en caso de error
+     */
+    public ResponseList<Status> getMentions() {
         try {
             return twitter.getMentionsTimeline();
         } catch (TwitterException e) {
@@ -283,13 +337,19 @@ public class TwitterManager {
         return null;
     }
 
-    public ResponseList<DirectMessage> getDirectMessages(){
+    /**
+     * Obtiene los mensajes directos recibidos, del usuario cuya sessión
+     * esta iniciada en la aplicación
+     *
+     * @return lista con los N mensajes directos más recientes recibidos o null en caso de error
+     */
+    public ResponseList<DirectMessage> getDirectMessages() {
         ResponseList<DirectMessage> directMessages;
         try {
-            if((directMessages = twitter.getDirectMessages()).size() == 0) {
+            if ((directMessages = twitter.getDirectMessages()).size() == 0) {
                 mainActivity.speak("No tiene mensajes directos recibidos.");
                 return null;
-            }else
+            } else
                 return directMessages;
         } catch (TwitterException e) {
             mainActivity.speak("No se pudieron obtener sus mensajes directos recibidos.");
@@ -297,13 +357,19 @@ public class TwitterManager {
         return null;
     }
 
-    public ResponseList<DirectMessage> getSentDirectMessages(){
+    /**
+     * Obtiene los mensajes directos enviados, del usuario cuya sessión
+     * esta iniciada en la aplicación
+     *
+     * @return lista con los N mensajes directos más reciente enviados o null en caso de error
+     */
+    public ResponseList<DirectMessage> getSentDirectMessages() {
         ResponseList<DirectMessage> sentDirectMessages;
         try {
-            if((sentDirectMessages = twitter.getSentDirectMessages()).size() == 0) {
+            if ((sentDirectMessages = twitter.getSentDirectMessages()).size() == 0) {
                 mainActivity.speak("No tiene mensajes directos enviados.");
                 return null;
-            }else
+            } else
                 return sentDirectMessages;
         } catch (TwitterException e) {
             mainActivity.speak("No se pudieron obtener sus mensajes directos enviados.");
@@ -311,18 +377,32 @@ public class TwitterManager {
         return null;
     }
 
-    public void sendDirectMessage(long userRecipientId, String reply){
+    /**
+     * Envía a un usuario un mensaje directo,
+     * utilizando el ID de la cuenta de twitter del usuario
+     *
+     * @param userRecipientId ID del usuario
+     * @param reply           contenido del mensaje directo
+     */
+    public void sendDirectMessage(long userRecipientId, String reply) {
         String userName = new String(" a: ");
         try {
             userName = userName + twitter.showUser(userRecipientId).getName();
             twitter.sendDirectMessage(userRecipientId, reply);
             mainActivity.speak("Su mensaje directo a sido enviado con éxito" + userName);
         } catch (TwitterException e) {
-            mainActivity.speak("No se pudo enviar su mensaje directo" + ((!userName.equals(" a: "))? userName : "."));
+            mainActivity.speak("No se pudo enviar su mensaje directo" + ((!userName.equals(" a: ")) ? userName : "."));
         }
     }
 
-    public void sendDirectMessage(String userName, String reply){
+    /**
+     * Envía a un usuario un mensaje directo,
+     * utilizando el nombre de la cuenta de twitter del usuario
+     *
+     * @param userName ID del usuario
+     * @param reply    contenido del mensaje directo
+     */
+    public void sendDirectMessage(String userName, String reply) {
         try {
             twitter.sendDirectMessage(userName, reply);
             mainActivity.speak("Su mensaje directo a sido enviado con éxito a: @" + userName);
@@ -333,7 +413,9 @@ public class TwitterManager {
 
     /**
      * Obtiene el TimeLine principal de la cuenta de Twitter del usuario
-     * @return Lista con los tweets del timeline o null en caso de error
+     * cuya sesión está iniciada en la aplicación
+     *
+     * @return Lista con los N tweets más recientes del timeline o null en caso de error
      */
     public ResponseList<Status> getTimeLine() {
         try {
@@ -344,12 +426,20 @@ public class TwitterManager {
         return null;
     }
 
-    public void signOut(){
+    /**
+     * Cierra la sesión del usuario en la aplicación
+     */
+    public void signOut() {
         mainActivity.save("accessToken", "");
         mainActivity.save("accessSecret", "");
     }
 
-    public  Trend[] getTrendsTitles(){
+    /**
+     * Obtiene los trending topics en Venezuela
+     *
+     * @return Lista con los primeros 10 trending topics o null en caso de error
+     */
+    public Trend[] getTrendsTitles() {
         try {
             return twitter.getPlaceTrends(23424982).getTrends();
         } catch (TwitterException e) {
@@ -358,20 +448,33 @@ public class TwitterManager {
         return null;
     }
 
-    public ResponseList<User> search(String text){
+    /**
+     * Realiza una búsqueda en twitter
+     *
+     * @param text texto que contiene la búsqueda a realizar en twitter
+     * @return Lista con los N primeros resultados encontrados o null en caso de error
+     */
+    public ResponseList<User> search(String text) {
         try {
             return twitter.searchUsers(text, 1);
-        } catch (TwitterException e){
+        } catch (TwitterException e) {
             mainActivity.speak("No se pudieron obtener los resultados de su búsqueda");
         }
         return null;
     }
 
-    public QueryResult search(String text, String name){
+    /**
+     * Obtiene los tweets de una tendencia indicada
+     *
+     * @param text texto que contiene la búsqueda a realizar en twitter de una tendencia indicada
+     * @param name nombre de la tendencia a buscar en twitter
+     * @return Lista con los N primeros tweets de la tendencia o null en caso de error
+     */
+    public QueryResult trendTweets(String text, String name) {
         try {
             Query query = new Query(text);
             return twitter.search(query);
-        } catch (TwitterException e){
+        } catch (TwitterException e) {
             mainActivity.speak("No se pudieron obtener los tweets de la tendencia " + name);
         }
         return null;
