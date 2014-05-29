@@ -665,7 +665,7 @@ public class AppMain {
                             mainActivity.speak("Leer, tendencias, menciones, mensajes, mensajes enviados, buscar, mi perfil, twittear, salir, cerrar sesión," +
                                     "repetir, siguiente, anterior, retweet, responder, favorito, quitar de favoritos, seguir, no seguir y más información.");
                         }else
-                            mainActivity.speak("Leer, tendencias, menciones, mensajes, mensajes enviados, buscar, mi perfil, twittear, salir, cerrar sesión.");
+                            mainActivity.speak("Leer, tendencias, menciones, mensajes, mensajes enviados, buscar, mi perfil, twittear, salir y cerrar sesión.");
                         break;
                 }
                         mainActivity.speak("Un placer servirle de ayuda.");
