@@ -672,6 +672,11 @@ public class AppMain {
                 continue;
             }
 
+            if(command.equals("acerca de")){
+                mainActivity.speak("Esta aplicación fue desarrollada en la Universidad Católica Andrés Bello extensión Guayana");
+                mainActivity.speak("Por Nader Abu Fakhr y Moisés Moussa");
+                continue;
+            }
             /*
             Comando de voz para cerrar la sesión en la aplicación
             */
