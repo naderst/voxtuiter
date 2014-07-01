@@ -5,6 +5,10 @@ Cliente de Twitter para personas con discapacidad visual. El cliente permite al 
 
 Este proyecto fue desarrollado en la asignatura Desarrollo de Software del 8vo Semestre de Ingeniería Informática de la [UCAB Guayana](http://guayanaweb.ucab.edu.ve).
 
+Descarga el apk
+-------
+[https://mega.co.nz/#!7wY1TJTB!gkhEEEpK2zbtkZpvysPk-OSsiQlnRwzZfiDtabaEVqU](https://mega.co.nz/#!7wY1TJTB!gkhEEEpK2zbtkZpvysPk-OSsiQlnRwzZfiDtabaEVqU)
+
 Librerías de terceros
 -------
 - twitter4j ([http://twitter4j.org](http://twitter4j.org/)): Utilizada como interfaz para manejar la API de Twitter.
